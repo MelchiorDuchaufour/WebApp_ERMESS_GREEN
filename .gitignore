@@ -10,3 +10,4 @@ __pycache__/
 *.pyc
 **/donnees/cache_pvgis/
 *.blend1
+app_dev/

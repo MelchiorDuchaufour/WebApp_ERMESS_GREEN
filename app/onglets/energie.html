@@ -3,56 +3,58 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Besoins énergétiques</title>
+<title data-i18n="en.titre_page">Besoins énergétiques</title>
 <link rel="stylesheet" href="/onglets/commun.css">
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
 </head>
 <body>
 <main>
-  <header class="onglet"><h1>Besoins de chauffage</h1><span class="badge">Prévisualisation · version de base</span></header>
-  <p class="chapo">Bilan horaire simplifié sur une année météo type du lieu (PVGIS) : déperditions par
+  <header class="onglet"><h1 data-i18n="en.h1">Besoins de chauffage</h1><span class="badge" data-i18n="commun.badge_base">Prévisualisation · version de base</span></header>
+  <p class="chapo" data-i18n="en.chapo">Bilan horaire simplifié sur une année météo type du lieu (PVGIS) : déperditions par
     l'enveloppe et le renouvellement d'air, moins les apports solaires utiles. Pour un ordre de grandeur et
     des comparaisons ; le modèle détaillé (GreenhousesJL) reste la référence.</p>
   <div class="grille">
     <div>
       <div class="carte">
-        <h2>Serre</h2>
-        <label class="champ">Longueur des faîtages (m)<input id="L" type="number" step="0.5"></label>
-        <label class="champ">Largeur totale (m)<input id="W" type="number" step="0.5"></label>
-        <label class="champ">Nombre de nefs<input id="n" type="number" min="1" max="20"></label>
-        <label class="champ">Hauteur au chéneau (m)<input id="h" type="number" step="0.1"></label>
-        <label class="champ">Pente de toiture (°)<input id="pente" type="number"></label>
+        <h2 data-i18n="commun.serre">Serre</h2>
+        <label class="champ"><span data-i18n="commun.L">Longueur des faîtages (m)</span><input id="L" type="number" step="0.5"></label>
+        <label class="champ"><span data-i18n="commun.W">Largeur totale (m)</span><input id="W" type="number" step="0.5"></label>
+        <label class="champ"><span data-i18n="commun.n">Nombre de nefs</span><input id="n" type="number" min="1" max="20"></label>
+        <label class="champ"><span data-i18n="commun.h">Hauteur au chéneau (m)</span><input id="h" type="number" step="0.1"></label>
+        <label class="champ"><span data-i18n="commun.pente">Pente de toiture (°)</span><input id="pente" type="number"></label>
       </div>
       <div class="carte">
-        <h2>Enveloppe et consignes</h2>
-        <label class="champ"><span>U toiture (W/m²·K)<small>verre simple ≈ 6</small></span><input id="Utoit" type="number" step="0.1"></label>
-        <label class="champ">U parois (W/m²·K)<input id="Uparois" type="number" step="0.1"></label>
-        <label class="champ"><span>Renouvellement d'air (vol/h)<small>infiltrations</small></span><input id="ach" type="number" step="0.1"></label>
-        <label class="champ">Transmission solaire<input id="tau" type="number" step="0.01" min="0" max="1"></label>
-        <label class="champ"><span>Part solaire utile<small>chaleur sensible</small></span><input id="eta" type="number" step="0.05" min="0" max="1"></label>
-        <label class="champ">Consigne jour (°C)<input id="Tjour" type="number" step="0.5"></label>
-        <label class="champ">Consigne nuit (°C)<input id="Tnuit" type="number" step="0.5"></label>
-        <button id="calc">Calculer</button>
+        <h2 data-i18n="en.enveloppe">Enveloppe et consignes</h2>
+        <label class="champ"><span><span data-i18n="en.Utoit">U toiture (W/m²·K)</span><small data-i18n="en.Utoit_aide">verre simple ≈ 6</small></span><input id="Utoit" type="number" step="0.1"></label>
+        <label class="champ"><span data-i18n="en.Uparois">U parois (W/m²·K)</span><input id="Uparois" type="number" step="0.1"></label>
+        <label class="champ"><span><span data-i18n="en.ach">Renouvellement d'air (vol/h)</span><small data-i18n="en.ach_aide">infiltrations</small></span><input id="ach" type="number" step="0.1"></label>
+        <label class="champ"><span data-i18n="en.tau">Transmission solaire</span><input id="tau" type="number" step="0.01" min="0" max="1"></label>
+        <label class="champ"><span><span data-i18n="en.eta">Part solaire utile</span><small data-i18n="en.eta_aide">chaleur sensible</small></span><input id="eta" type="number" step="0.05" min="0" max="1"></label>
+        <label class="champ"><span data-i18n="en.Tjour">Consigne jour (°C)</span><input id="Tjour" type="number" step="0.5"></label>
+        <label class="champ"><span data-i18n="en.Tnuit">Consigne nuit (°C)</span><input id="Tnuit" type="number" step="0.5"></label>
+        <button id="calc" data-i18n="en.calculer">Calculer</button>
         <div class="etat" id="etat"></div>
       </div>
     </div>
     <div>
       <div class="tuiles">
-        <div class="tuile"><div class="v" id="t-tot">–</div><div class="l">Besoin annuel de chauffage</div></div>
-        <div class="tuile"><div class="v" id="t-m2">–</div><div class="l">Par m² de serre</div></div>
-        <div class="tuile"><div class="v" id="t-pointe">–</div><div class="l">Puissance de pointe</div></div>
-        <div class="tuile"><div class="v" id="t-ua">–</div><div class="l">Déperditions totales (UA + air)</div></div>
+        <div class="tuile"><div class="v" id="t-tot">–</div><div class="l" data-i18n="en.t_tot">Besoin annuel de chauffage</div></div>
+        <div class="tuile"><div class="v" id="t-m2">–</div><div class="l" data-i18n="en.t_m2">Par m² de serre</div></div>
+        <div class="tuile"><div class="v" id="t-pointe">–</div><div class="l" data-i18n="en.t_pointe">Puissance de pointe</div></div>
+        <div class="tuile"><div class="v" id="t-ua">–</div><div class="l" data-i18n="en.t_ua">Déperditions totales (UA + air)</div></div>
       </div>
       <div class="carte">
-        <h2>Besoin mensuel</h2>
+        <h2 data-i18n="en.mensuel">Besoin mensuel</h2>
         <div class="graphe" id="graphe"></div>
-        <details><summary>Voir le tableau</summary><div id="table"></div></details>
+        <details><summary data-i18n="commun.tableau">Voir le tableau</summary><div id="table"></div></details>
       </div>
-      <div class="carte"><h2>Hypothèses</h2><div class="note" id="hyp"></div></div>
+      <div class="carte"><h2 data-i18n="commun.hypotheses">Hypothèses</h2><div class="note" id="hyp"></div></div>
     </div>
   </div>
 </main>
 <script type="module">
+import { t, appliquer } from "/onglets/i18n.js";
+appliquer();
 import { lieuDuSite, geometrie, RIGERIE, PARAM_BASE, besoinChauffage, tmy, MOIS, fmt, barres, tableau } from "/onglets/commun.js";
 const $ = id => document.getElementById(id);
 const lieu = await lieuDuSite();
@@ -62,23 +64,21 @@ let meteo = null;
 async function calculer() {
   const etat = $("etat"); etat.className = "etat";
   try {
-    if (!meteo) { etat.textContent = "Année météo type PVGIS…"; meteo = await tmy(lieu.lat, lieu.lon); }
+    if (!meteo) { etat.textContent = t("commun.tmy_charge"); meteo = await tmy(lieu.lat, lieu.lon); }
     const g = geometrie(Object.fromEntries(["L", "W", "n", "h", "pente"].map(k => [k, +$(k).value])));
     const p = { ...PARAM_BASE, ...Object.fromEntries(["Utoit", "Uparois", "ach", "tau", "eta", "Tjour", "Tnuit"].map(k => [k, +$(k).value])) };
     const r = besoinChauffage(meteo, g, p);
     const ua = p.Utoit * g.toit + p.Uparois * g.parois + 0.335 * p.ach * g.volume;
-    $("t-tot").innerHTML = `${fmt(r.total / 1000, 0)}<span class="u">MWh/an</span>`;
-    $("t-m2").innerHTML = `${fmt(r.parM2, 0)}<span class="u">kWh/m²·an</span>`;
+    $("t-tot").innerHTML = `${fmt(r.total / 1000, 0)}<span class="u">${t("u.mwh_an")}</span>`;
+    $("t-m2").innerHTML = `${fmt(r.parM2, 0)}<span class="u">${t("u.kwh_m2_an")}</span>`;
     $("t-pointe").innerHTML = `${fmt(r.pointe, 0)}<span class="u">kW</span>`;
     $("t-ua").innerHTML = `${fmt(ua / 1000, 1)}<span class="u">kW/K</span>`;
     barres("graphe", MOIS, r.mois.map(v => v / 1000), { unite: "MWh", survol: "%{x} : %{y:,.1f} MWh<extra></extra>" });
-    tableau($("table"), ["Mois", "Besoin (MWh)"], MOIS.map((m, i) => [m, fmt(r.mois[i] / 1000, 1)]).concat([["Année", fmt(r.total / 1000, 1)]]));
-    $("hyp").innerHTML = `${lieu.nom}, ${lieu.ville} (${lieu.lat}°, ${lieu.lon}°). Sol ${fmt(g.sol)} m², toiture ${fmt(g.toit)} m²,
-      parois ${fmt(g.parois)} m², volume ${fmt(g.volume)} m³. Nuit = rayonnement global &lt; 10 W/m².
-      Besoin horaire = max(0, (U·A + 0,335·n·V)(T consigne − T ext) − τ·part utile·rayonnement·surface au sol),
-      sans inertie, sans déshumidification ni rayonnement vers le ciel : ordre de grandeur seulement.`;
-    etat.textContent = "Calcul à jour.";
-  } catch (e) { etat.className = "etat erreur"; etat.textContent = "Échec : " + e.message; }
+    tableau($("table"), [t("commun.mois"), t("en.col_besoin")], MOIS.map((m, i) => [m, fmt(r.mois[i] / 1000, 1)]).concat([[t("commun.annee"), fmt(r.total / 1000, 1)]]));
+    $("hyp").innerHTML = t("en.hyp", { nom: lieu.nom, ville: lieu.ville, lat: lieu.lat, lon: lieu.lon,
+      sol: fmt(g.sol), toit: fmt(g.toit), parois: fmt(g.parois), vol: fmt(g.volume) });
+    etat.textContent = t("en.a_jour");
+  } catch (e) { etat.className = "etat erreur"; etat.textContent = t("commun.echec", { msg: e.message }); }
 }
 $("calc").onclick = calculer;
 calculer();

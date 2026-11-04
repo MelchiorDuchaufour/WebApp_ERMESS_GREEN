@@ -2,12 +2,13 @@
 // Modèle volontairement simple : ordres de grandeur pour l'outil de calcul ERMESS
 // Green (WP3.4). Le calcul détaillé reste celui de GreenhousesJL.
 
+import { LOCALE, SEPARATEURS, champSite } from "/onglets/i18n.js";
 export const SITE_DEFAUT = "bocage";
 
 export async function lieuDuSite(sid = SITE_DEFAUT) {
   const sites = await (await fetch("/api/sites")).json();
   const s = sites[sid] || Object.values(sites)[0];
-  return { nom: s.nom, ...s.lieu };
+  return { ...s.lieu, nom: champSite(s, "nom"), description: champSite(s, "description") };
 }
 
 // Géométrie d'une serre multi-chapelles rectangulaire.
@@ -65,8 +66,8 @@ export async function pvgis(lat, lon, angle, aspect, loss = 14) {
   const j = await r.json(); if (j.error) throw new Error(j.error); return j;
 }
 
-export const MOIS = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
-export const fmt = (v, d = 0) => v.toLocaleString("fr-FR", { maximumFractionDigits: d, minimumFractionDigits: d });
+export const MOIS = Array.from({ length: 12 }, (_, m) => new Date(2001, m, 15).toLocaleString(LOCALE, { month: "short" }));
+export const fmt = (v, d = 0) => v.toLocaleString(LOCALE, { maximumFractionDigits: d, minimumFractionDigits: d });
 
 // Graphique en barres à une série, couleurs prises dans les jetons CSS de la page.
 export function barres(el, x, y, { unite, titre, survol, couleurs } = {}) {
@@ -77,13 +78,13 @@ export function barres(el, x, y, { unite, titre, survol, couleurs } = {}) {
   }], {
     margin: { l: 56, r: 12, t: titre ? 30 : 10, b: 40 }, bargap: 0.35,
     title: titre ? { text: titre, font: { size: 13 }, x: 0, xanchor: "left" } : undefined,
-    paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
+    paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)", separators: SEPARATEURS,
     font: { color: v("--ink"), size: 12, family: "system-ui, sans-serif" },
     xaxis: { showgrid: false, linecolor: v("--line"), tickfont: { color: v("--muted") } },
     yaxis: { gridcolor: v("--line"), zeroline: false, tickfont: { color: v("--muted") },
              title: { text: unite || "", font: { size: 11, color: v("--muted") } }, separatethousands: true },
     hoverlabel: { bgcolor: v("--panel"), bordercolor: v("--line"), font: { color: v("--ink") } },
-  }, { displayModeBar: false, responsive: true, locale: "fr" });
+  }, { displayModeBar: false, responsive: true });
 }
 
 // Tableau HTML (vue accessible des graphiques)

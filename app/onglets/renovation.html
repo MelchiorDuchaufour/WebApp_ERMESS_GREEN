@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Gains de rénovation</title>
+<title data-i18n="ren.titre_page">Gains de rénovation</title>
 <link rel="stylesheet" href="/onglets/commun.css">
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
 <style>
@@ -14,81 +14,82 @@
 </head>
 <body>
 <main>
-  <header class="onglet"><h1>Gains d'efficacité par rénovation</h1><span class="badge">Prévisualisation · version de base</span></header>
-  <p class="chapo">Économie de chauffage de chaque mesure, seule puis combinée, par rapport à la serre actuelle
-    (même modèle horaire que l'onglet Besoins). Les valeurs d'efficacité sont des hypothèses courantes, modifiables.</p>
+  <header class="onglet"><h1 data-i18n="ren.h1">Gains d'efficacité par rénovation</h1><span class="badge" data-i18n="commun.badge_base">Prévisualisation · version de base</span></header>
+  <p class="chapo" data-i18n="ren.chapo"></p>
   <div class="grille">
     <div>
       <div class="carte">
-        <h2>Mesures</h2>
-        <label class="scen"><input type="checkbox" id="m-ecran" checked><span>Écran thermique nocturne
-          <small>économie sur les déperditions de toiture la nuit : <input id="ecran" type="number" step="5" value="35" style="width:56px"> %</small></span></label>
-        <label class="scen"><input type="checkbox" id="m-double" checked><span>Double paroi (polycarbonate)
-          <small>U <input id="Udouble" type="number" step="0.1" value="3.5" style="width:56px"> W/m²·K, transmission −10 %</small></span></label>
-        <label class="scen"><input type="checkbox" id="m-isol" checked><span>Isolation du mur nord et des pignons
-          <small><input id="fracIsol" type="number" step="5" value="25" style="width:56px"> % des parois à U 0,5 W/m²·K</small></span></label>
-        <label class="scen"><input type="checkbox" id="m-etanch" checked><span>Étanchéité à l'air
-          <small>renouvellement ramené à <input id="ach2" type="number" step="0.1" value="0.5" style="width:56px"> vol/h</small></span></label>
-        <label class="scen"><input type="checkbox" id="m-consigne"><span>Consigne de nuit abaissée
-          <small>de <input id="dT" type="number" step="0.5" value="2" style="width:56px"> °C</small></span></label>
-        <button id="calc">Comparer</button>
+        <h2 data-i18n="ren.mesures">Mesures</h2>
+        <label class="scen"><input type="checkbox" id="m-ecran" checked><span><span data-i18n="ren.ecran">Écran thermique nocturne</span>
+          <small><span data-i18n="ren.ecran_aide">économie sur les déperditions de toiture la nuit :</span> <input id="ecran" type="number" step="5" value="35" style="width:56px"> %</small></span></label>
+        <label class="scen"><input type="checkbox" id="m-double" checked><span><span data-i18n="ren.double">Double paroi (polycarbonate)</span>
+          <small>U <input id="Udouble" type="number" step="0.1" value="3.5" style="width:56px"> <span data-i18n="ren.double_aide">W/m²·K, transmission −10 %</span></small></span></label>
+        <label class="scen"><input type="checkbox" id="m-isol" checked><span><span data-i18n="ren.isol">Isolation du mur nord et des pignons</span>
+          <small><input id="fracIsol" type="number" step="5" value="25" style="width:56px"> <span data-i18n="ren.isol_aide">% des parois à U 0,5 W/m²·K</span></small></span></label>
+        <label class="scen"><input type="checkbox" id="m-etanch" checked><span><span data-i18n="ren.etanch">Étanchéité à l'air</span>
+          <small><span data-i18n="ren.etanch_aide">renouvellement ramené à</span> <input id="ach2" type="number" step="0.1" value="0.5" style="width:56px"> vol/h</small></span></label>
+        <label class="scen"><input type="checkbox" id="m-consigne"><span><span data-i18n="ren.consigne">Consigne de nuit abaissée</span>
+          <small><span data-i18n="ren.consigne_aide">de</span> <input id="dT" type="number" step="0.5" value="2" style="width:56px"> °C</small></span></label>
+        <button id="calc" data-i18n="ren.comparer">Comparer</button>
         <div class="etat" id="etat"></div>
       </div>
     </div>
     <div>
       <div class="tuiles">
-        <div class="tuile"><div class="v" id="t-base">–</div><div class="l">Serre actuelle</div></div>
-        <div class="tuile"><div class="v" id="t-comb">–</div><div class="l">Avec toutes les mesures cochées</div></div>
-        <div class="tuile"><div class="v" id="t-gain">–</div><div class="l">Économie combinée</div></div>
+        <div class="tuile"><div class="v" id="t-base">–</div><div class="l" data-i18n="ren.t_base">Serre actuelle</div></div>
+        <div class="tuile"><div class="v" id="t-comb">–</div><div class="l" data-i18n="ren.t_comb">Avec toutes les mesures cochées</div></div>
+        <div class="tuile"><div class="v" id="t-gain">–</div><div class="l" data-i18n="ren.t_gain">Économie combinée</div></div>
       </div>
       <div class="carte">
-        <h2>Besoin annuel de chauffage par scénario</h2>
+        <h2 data-i18n="ren.graphe">Besoin annuel de chauffage par scénario</h2>
         <div class="graphe" id="graphe" style="height:340px"></div>
-        <details><summary>Voir le tableau</summary><div id="table"></div></details>
-        <div class="note">Les économies ne s'additionnent pas : la combinaison est recalculée, pas sommée.</div>
+        <details><summary data-i18n="commun.tableau">Voir le tableau</summary><div id="table"></div></details>
+        <div class="note" data-i18n="ren.note">Les économies ne s'additionnent pas : la combinaison est recalculée, pas sommée.</div>
       </div>
     </div>
   </div>
 </main>
 <script type="module">
+import { t, appliquer } from "/onglets/i18n.js";
+appliquer();
 import { lieuDuSite, geometrie, RIGERIE, PARAM_BASE, besoinChauffage, tmy, fmt, barres, tableau } from "/onglets/commun.js";
 const $ = id => document.getElementById(id);
 const lieu = await lieuDuSite();
 const g = geometrie(RIGERIE);
 let meteo = null;
 const MESURES = {
-  ecran:    { nom: "Écran thermique", p: () => ({ ecran: +$("ecran").value / 100 }) },
-  double:   { nom: "Double paroi", p: () => ({ Utoit: +$("Udouble").value, Uparois: +$("Udouble").value, tau: PARAM_BASE.tau * 0.9 }) },
-  isol:     { nom: "Isolation mur nord", p: () => ({ fracIsol: +$("fracIsol").value / 100, Uisol: 0.5 }) },
-  etanch:   { nom: "Étanchéité", p: () => ({ ach: +$("ach2").value }) },
-  consigne: { nom: "Consigne nuit", p: () => ({ Tnuit: PARAM_BASE.Tnuit - +$("dT").value }) },
+  ecran:    { nom: t("ren.n_ecran"), p: () => ({ ecran: +$("ecran").value / 100 }) },
+  double:   { nom: t("ren.n_double"), p: () => ({ Utoit: +$("Udouble").value, Uparois: +$("Udouble").value, tau: PARAM_BASE.tau * 0.9 }) },
+  isol:     { nom: t("ren.n_isol"), p: () => ({ fracIsol: +$("fracIsol").value / 100, Uisol: 0.5 }) },
+  etanch:   { nom: t("ren.n_etanch"), p: () => ({ ach: +$("ach2").value }) },
+  consigne: { nom: t("ren.n_consigne"), p: () => ({ Tnuit: PARAM_BASE.Tnuit - +$("dT").value }) },
 };
 async function calculer() {
   const etat = $("etat"); etat.className = "etat";
   try {
-    if (!meteo) { etat.textContent = "Année météo type PVGIS…"; meteo = await tmy(lieu.lat, lieu.lon); }
+    if (!meteo) { etat.textContent = t("commun.tmy_charge"); meteo = await tmy(lieu.lat, lieu.lon); }
     const base = besoinChauffage(meteo, g, PARAM_BASE).total;
     const choisies = Object.keys(MESURES).filter(k => $("m-" + k).checked);
-    const lignes = [["Serre actuelle", base]];
+    const BASE = t("ren.t_base"), lignes = [[BASE, base]];
     for (const k of choisies) lignes.push([MESURES[k].nom, besoinChauffage(meteo, g, { ...PARAM_BASE, ...MESURES[k].p() }).total]);
     let comb = base;
     if (choisies.length > 1) {
       comb = besoinChauffage(meteo, g, Object.assign({ ...PARAM_BASE }, ...choisies.map(k => MESURES[k].p()))).total;
-      lignes.push(["Combinaison", comb]);
+      lignes.push([t("ren.n_comb"), comb]);
     } else if (choisies.length === 1) comb = lignes[1][1];
     const css = getComputedStyle(document.documentElement);
-    const couleurs = lignes.map(([n]) => n === "Serre actuelle" ? css.getPropertyValue("--serie-2").trim() : css.getPropertyValue("--serie").trim());
+    const couleurs = lignes.map(([n]) => n === BASE ? css.getPropertyValue("--serie-2").trim() : css.getPropertyValue("--serie").trim());
     barres("graphe", lignes.map(l => l[0]), lignes.map(l => l[1] / 1000), {
-      unite: "MWh/an", couleurs });
+      unite: t("u.mwh_an"), couleurs });
     // infobulle propre à chaque barre
-    Plotly.restyle("graphe", { customdata: [lignes.map(([, v]) => v === base ? "référence" : "−" + fmt((1 - v / base) * 100) + " %")],
-      hovertemplate: "%{x} : %{y:,.0f} MWh/an · %{customdata}<extra></extra>" });
-    tableau($("table"), ["Scénario", "Besoin (MWh/an)", "Économie"], lignes.map(([n, v]) => [n, fmt(v / 1000, 1), v === base ? "–" : fmt((1 - v / base) * 100) + " %"]));
-    $("t-base").innerHTML = `${fmt(base / 1000)}<span class="u">MWh/an</span>`;
-    $("t-comb").innerHTML = `${fmt(comb / 1000)}<span class="u">MWh/an</span>`;
+    Plotly.restyle("graphe", { customdata: [lignes.map(([, v]) => v === base ? t("ren.reference") : "−" + fmt((1 - v / base) * 100) + " %")],
+      hovertemplate: `%{x} : %{y:,.0f} ${t("u.mwh_an")} · %{customdata}<extra></extra>` });
+    tableau($("table"), [t("ren.col_scen"), t("ren.col_besoin"), t("ren.col_eco")], lignes.map(([n, v]) => [n, fmt(v / 1000, 1), v === base ? "–" : fmt((1 - v / base) * 100) + " %"]));
+    $("t-base").innerHTML = `${fmt(base / 1000)}<span class="u">${t("u.mwh_an")}</span>`;
+    $("t-comb").innerHTML = `${fmt(comb / 1000)}<span class="u">${t("u.mwh_an")}</span>`;
     $("t-gain").innerHTML = `${fmt((1 - comb / base) * 100)}<span class="u">%</span>`;
-    etat.textContent = `${lieu.ville}, serre ${fmt(g.sol)} m² (géométrie Rigerie).`;
-  } catch (e) { etat.className = "etat erreur"; etat.textContent = "Échec : " + e.message; }
+    etat.textContent = t("ren.etat", { ville: lieu.ville, sol: fmt(g.sol) });
+  } catch (e) { etat.className = "etat erreur"; etat.textContent = t("commun.echec", { msg: e.message }); }
 }
 $("calc").onclick = calculer;
 document.querySelectorAll("input").forEach(i => i.addEventListener("change", calculer));

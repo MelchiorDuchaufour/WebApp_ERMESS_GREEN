@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Contrôle des actionneurs</title>
+<title data-i18n="ctl.titre_page">Contrôle des actionneurs</title>
 <link rel="stylesheet" href="/onglets/commun.css">
 <style>
 .curseur{display:grid;grid-template-columns:130px 1fr 54px;gap:10px;align-items:center;margin:10px 0;font-size:13px}
@@ -13,40 +13,43 @@ svg text{font:11px system-ui,sans-serif;fill:var(--muted)}
 </head>
 <body>
 <main>
-  <header class="onglet"><h1>Contrôle : écrans, ouvrants, chauffage</h1><span class="badge">Prévisualisation · version de contrôle</span></header>
-  <p class="chapo">État des actionneurs de la serre Rigerie. Aucun signal du régulateur climatique n'est encore relié :
+  <header class="onglet"><h1 data-i18n="ctl.h1">Contrôle : écrans, ouvrants, chauffage</h1><span class="badge" data-i18n="commun.badge_controle">Prévisualisation · version de contrôle</span></header>
+  <p class="chapo" data-i18n-html="ctl.chapo">État des actionneurs de la serre Rigerie. Aucun signal du régulateur climatique n'est encore relié :
     l'état est saisi ici, enregistré par le serveur (<code>actionneurs_bocage.json</code>) et affiché en direct dans
     Blender (<code>blender/blender_live.py</code>). La version de contrôle reliera ces valeurs à l'automate de la serre.</p>
   <div class="grille">
     <div class="carte">
-      <h2>Consignes</h2>
-      <div class="curseur"><span>Écran nef 1</span><input type="range" id="e0" min="0" max="100" step="5"><output id="o-e0"></output></div>
-      <div class="curseur"><span>Écran nef 2</span><input type="range" id="e1" min="0" max="100" step="5"><output id="o-e1"></output></div>
-      <div class="curseur"><span>Écran nef 3</span><input type="range" id="e2" min="0" max="100" step="5"><output id="o-e2"></output></div>
-      <div class="curseur"><span>Ouvrants de faîtage</span><input type="range" id="ouv" min="0" max="45" step="1"><output id="o-ouv"></output></div>
-      <div class="curseur"><span>Chauffage</span><input type="range" id="ch" min="0" max="100" step="5"><output id="o-ch"></output></div>
-      <button id="envoyer">Enregistrer l'état</button>
-      <button id="nuit" class="second">Préréglage nuit</button>
-      <button id="jour" class="second">Préréglage jour chaud</button>
+      <h2 data-i18n="ctl.consignes">Consignes</h2>
+      <div class="curseur"><span class="i-ecran" data-n="1">Écran nef 1</span><input type="range" id="e0" min="0" max="100" step="5"><output id="o-e0"></output></div>
+      <div class="curseur"><span class="i-ecran" data-n="2">Écran nef 2</span><input type="range" id="e1" min="0" max="100" step="5"><output id="o-e1"></output></div>
+      <div class="curseur"><span class="i-ecran" data-n="3">Écran nef 3</span><input type="range" id="e2" min="0" max="100" step="5"><output id="o-e2"></output></div>
+      <div class="curseur"><span data-i18n="ctl.ouvrants">Ouvrants de faîtage</span><input type="range" id="ouv" min="0" max="45" step="1"><output id="o-ouv"></output></div>
+      <div class="curseur"><span data-i18n="ctl.chauffage">Chauffage</span><input type="range" id="ch" min="0" max="100" step="5"><output id="o-ch"></output></div>
+      <button id="envoyer" data-i18n="ctl.envoyer">Enregistrer l'état</button>
+      <button id="nuit" class="second" data-i18n="ctl.nuit">Préréglage nuit</button>
+      <button id="jour" class="second" data-i18n="ctl.jour">Préréglage jour chaud</button>
       <div class="etat" id="etat"></div>
     </div>
     <div class="carte">
-      <h2>Coupe transversale (3 nefs)</h2>
-      <svg id="coupe" viewBox="0 0 720 260" width="100%" role="img" aria-label="Coupe de la serre avec écrans et ouvrants"></svg>
+      <h2 data-i18n="ctl.coupe">Coupe transversale (3 nefs)</h2>
+      <svg id="coupe" viewBox="0 0 720 260" width="100%" role="img" aria-label="Coupe de la serre avec écrans et ouvrants" data-i18n-aria="ctl.coupe_aria"></svg>
       <div class="note" id="maj"></div>
     </div>
   </div>
 </main>
 <script type="module">
+import { t, appliquer } from "/onglets/i18n.js";
+appliquer();
+document.querySelectorAll(".i-ecran").forEach(e => e.textContent = t("ctl.ecran", { n: e.dataset.n }));
 const $ = id => document.getElementById(id);
 const SITE = new URLSearchParams(location.search).get("site") || "bocage";
 const etatCourant = () => ({ ecrans: [0, 1, 2].map(i => +$("e" + i).value / 100), ouvrants_deg: +$("ouv").value,
-                             chauffage: +$("ch").value / 100, source: "manuel (onglet Contrôle)" });
+                             chauffage: +$("ch").value / 100, source: t("ctl.src_manuel") });
 function afficher(a) {
   [0, 1, 2].forEach(i => $("e" + i).value = Math.round((a.ecrans[i] ?? 0) * 100));
   $("ouv").value = a.ouvrants_deg; $("ch").value = Math.round(a.chauffage * 100);
   sorties(); dessiner();
-  $("maj").textContent = a.maj ? `Dernier enregistrement : ${a.maj} (${a.source})` : "Jamais enregistré";
+  $("maj").textContent = a.maj ? t("ctl.dernier", { maj: a.maj, src: a.source }) : t("ctl.jamais");
 }
 function sorties() {
   [0, 1, 2].forEach(i => $("o-e" + i).value = $("e" + i).value + " %");
@@ -59,7 +62,7 @@ function dessiner() {
   // tubes de chauffage
   const chaud = a.chauffage;
   s += `<line x1="${x0}" y1="${sol - 18}" x2="${W - x0}" y2="${sol - 18}" stroke="rgb(${Math.round(40 + 180 * chaud)},${Math.round(90 - 50 * chaud)},60)" stroke-width="${3 + 3 * chaud}" stroke-linecap="round"/>`;
-  s += `<text x="${x0}" y="${sol - 26}">chauffage ${Math.round(chaud * 100)} %</text>`;
+  s += `<text x="${x0}" y="${sol - 26}">${t("ctl.svg_chauffage", { n: Math.round(chaud * 100) })}</text>`;
   for (let i = 0; i < 3; i++) {
     const xa = x0 + i * nef, xb = xa + nef, xm = (xa + xb) / 2;
     s += `<polyline points="${xa},${sol} ${xa},${ch} ${xm},${fa} ${xb},${ch} ${xb},${sol}" fill="none" stroke="${c("--muted")}" stroke-width="1.5"/>`;
@@ -70,23 +73,23 @@ function dessiner() {
     // écran : tiré depuis le chéneau gauche
     const f = a.ecrans[i], larg = Math.max(4, f * nef);
     s += `<line x1="${xa}" y1="${ch + 6}" x2="${xa + larg}" y2="${ch + 6}" stroke="${c("--warn")}" stroke-width="5" stroke-linecap="round"/>`;
-    s += `<text x="${xm}" y="${sol + 18}" text-anchor="middle">nef ${i + 1} · écran ${Math.round(f * 100)} %</text>`;
+    s += `<text x="${xm}" y="${sol + 18}" text-anchor="middle">${t("ctl.svg_nef", { i: i + 1, n: Math.round(f * 100) })}</text>`;
   }
-  s += `<text x="${W - x0}" y="${fa - 10}" text-anchor="end">ouvrants ${a.ouvrants_deg}°</text>`;
+  s += `<text x="${W - x0}" y="${fa - 10}" text-anchor="end">${t("ctl.svg_ouv", { n: a.ouvrants_deg })}</text>`;
   $("coupe").innerHTML = s;
 }
 document.querySelectorAll("input[type=range]").forEach(r => r.oninput = () => { sorties(); dessiner(); });
 async function envoyer(a = etatCourant()) {
-  const etat = $("etat"); etat.className = "etat"; etat.textContent = "Enregistrement…";
+  const etat = $("etat"); etat.className = "etat"; etat.textContent = t("serre.enreg");
   try {
     const r = await fetch(`/api/actionneurs?site=${SITE}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(a) });
     const j = await r.json(); if (!r.ok) throw new Error(j.error);
-    afficher(j); etat.textContent = "Enregistré. Blender le reprend au prochain rafraîchissement.";
-  } catch (e) { etat.className = "etat erreur"; etat.textContent = "Échec : " + e.message; }
+    afficher(j); etat.textContent = t("ctl.enregistre");
+  } catch (e) { etat.className = "etat erreur"; etat.textContent = t("commun.echec", { msg: e.message }); }
 }
 $("envoyer").onclick = () => envoyer();
-$("nuit").onclick = () => envoyer({ ecrans: [1, 1, 1], ouvrants_deg: 0, chauffage: 0.7, source: "préréglage nuit" });
-$("jour").onclick = () => envoyer({ ecrans: [0.6, 0.6, 0.6], ouvrants_deg: 35, chauffage: 0, source: "préréglage jour chaud" });
+$("nuit").onclick = () => envoyer({ ecrans: [1, 1, 1], ouvrants_deg: 0, chauffage: 0.7, source: t("ctl.src_nuit") });
+$("jour").onclick = () => envoyer({ ecrans: [0.6, 0.6, 0.6], ouvrants_deg: 35, chauffage: 0, source: t("ctl.src_jour") });
 afficher(await (await fetch(`/api/actionneurs?site=${SITE}`)).json());
 </script>
 </body>

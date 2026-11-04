@@ -1,4 +1,5 @@
 // Liens des logos (accueil et vue d'un site). Un lien vide = logo non cliquable.
+import { t } from "/onglets/i18n.js";
 export const ERMESS = "https://www.univ-smb.fr/locie/2025/12/15/ermess-green-project";
 export const PARTENAIRES = [
   { img: "/logos/interreg.png",    alt: "Interreg Alcotra",              url: "https://www.interreg-alcotra.eu/" },
@@ -13,6 +14,6 @@ export function remplirPartenaires(conteneur) {
     const img = Object.assign(document.createElement("img"), { src: p.img, alt: p.alt, title: p.alt });
     if (!p.url) return img;
     const a = Object.assign(document.createElement("a"), { href: p.url, target: "_blank", rel: "noopener" });
-    a.title = `${p.alt} : ouvrir le site`; a.append(img); return a;
+    a.title = t("commun.ouvrir_site", { nom: p.alt }); a.append(img); return a;
   }));
 }

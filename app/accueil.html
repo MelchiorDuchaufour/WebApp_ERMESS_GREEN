@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ERMESS Green · Serres</title>
+<title data-i18n="acc.titre_page">ERMESS Green · Serres</title>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
 <script type="importmap">
 { "imports": {
@@ -63,6 +63,10 @@ html,body{margin:0;height:100%;overflow:hidden;color:var(--ink);
 #partenaires img{height:50px;max-width:170px;object-fit:contain;background:#fff;border-radius:6px;padding:4px 8px;display:block;
   transition:transform .15s ease,box-shadow .15s ease}
 #partenaires a:hover img{transform:translateY(-2px) scale(1.05);box-shadow:0 3px 10px rgba(0,0,0,.18)}
+#langue{position:fixed;top:16px;right:18px;z-index:6;display:flex;gap:2px;background:color-mix(in srgb,var(--carte) 85%,transparent);
+  border:1px solid var(--line);border-radius:8px;padding:2px}
+#langue button{font:600 12px/1 system-ui,sans-serif;border:0;background:transparent;color:var(--muted);padding:6px 9px;border-radius:6px;cursor:pointer}
+#langue button[aria-pressed="true"]{background:var(--accent);color:#fff}
 #source{position:fixed;right:10px;bottom:84px;z-index:5;font-size:10px;color:var(--muted)}
 @media (max-width:720px){
   #logo img{height:64px}
@@ -76,12 +80,13 @@ html,body{margin:0;height:100%;overflow:hidden;color:var(--ink);
 </head>
 <body>
 <div id="scene"></div>
-<a id="logo" href="#" target="_blank" rel="noopener" title="En savoir plus sur le projet ERMESS Green">
-  <img src="/logos/ermess_green_transparent.png" alt="ERMESS Green"><span class="plus">En savoir plus ↗</span></a>
-<div id="titre"><h1>Serres instrumentées France – Italie</h1><p>Capteurs Sigrow en temps réel · Interreg Alcotra ERMESS Green</p></div>
-<div id="chargement">Chargement du relief…</div>
-<div id="aide">Survole une serre, clique pour l'ouvrir · glisser pour tourner, molette pour zoomer</div>
-<div id="source">Relief : Mapzen Terrarium (AWS) · Frontières : Natural Earth</div>
+<a id="logo" href="#" target="_blank" rel="noopener" data-i18n-title="commun.ermess_titre" title="En savoir plus sur le projet ERMESS Green">
+  <img src="/logos/ermess_green_transparent.png" alt="ERMESS Green"><span class="plus" data-i18n="commun.ermess_plus">En savoir plus ↗</span></a>
+<div id="titre"><h1 data-i18n="acc.h1">Serres instrumentées France – Italie</h1><p data-i18n="acc.sous">Capteurs Sigrow en temps réel · Interreg Alcotra ERMESS Green</p></div>
+<div id="chargement" data-i18n="acc.chargement">Chargement du relief…</div>
+<div id="aide" data-i18n="acc.aide">Survole une serre, clique pour l'ouvrir · glisser pour tourner, molette pour zoomer</div>
+<div id="langue"></div>
+<div id="source" data-i18n="acc.source">Relief : Mapzen Terrarium (AWS) · Frontières : Natural Earth</div>
 <div id="partenaires"></div>
 
 <script type="module">
@@ -89,6 +94,8 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { CSS2DRenderer, CSS2DObject } from "three/addons/renderers/CSS2DRenderer.js";
 import { ERMESS, remplirPartenaires } from "/logos/liens.js";
+import { t, appliquer, selecteurLangue, champSite, avecLangue } from "/onglets/i18n.js";
+appliquer(); selecteurLangue(document.getElementById("langue"));
 document.getElementById("logo").href = ERMESS;
 remplirPartenaires(document.getElementById("partenaires"));
 
@@ -271,7 +278,7 @@ async function placerSites() {
   const occupe = new Set(Object.values(sites).map(s => s.lieu?.ville));
   for (const [v, lat, lon] of VILLES) if (!occupe.has(v)) etiquette(v, "ville", lon, lat, 0.5);
   etiquette("FRANCE", "pays", 5.55, 44.55, 0); etiquette("ITALIA", "pays", 8.6, 45.0, 0);
-  etiquette("SUISSE · SVIZZERA", "pays", 7.6, 46.45, 0);
+  etiquette(t("acc.suisse"), "pays", 7.6, 46.45, 0);
   const css = getComputedStyle(document.documentElement);
   for (const [sid, s] of Object.entries(sites)) {
     const l = s.lieu; if (!l) continue;
@@ -286,9 +293,9 @@ async function placerSites() {
     g.scale.setScalar(TAILLE); g.userData.sid = sid; g.traverse(o => o.userData.sid = sid);
     scene.add(g);
     const d = document.createElement("div"); d.className = "fiche";
-    d.innerHTML = `<b><span class="drapeau" style="background:${l.pays === "IT" ? "#2f9e5a" : "#3b6fb6"}">${l.pays}</span>${s.nom}</b>
-      <div class="l">${l.ville}${l.a_confirmer ? ' <span class="conf">· localisation à confirmer</span>' : ""}</div>
-      <div class="l">${l.description || ""}</div><div class="v">${s.actif ? "Mesures en cours de chargement…" : "Pas encore de capteurs connectés"}</div>`;
+    d.innerHTML = `<b><span class="drapeau" style="background:${l.pays === "IT" ? "#2f9e5a" : "#3b6fb6"}">${l.pays}</span>${champSite(s, "nom")}</b>
+      <div class="l">${l.ville}${l.a_confirmer ? ` <span class="conf">· ${t("acc.a_confirmer")}</span>` : ""}</div>
+      <div class="l">${champSite(s, "description")}</div><div class="v">${s.actif ? t("acc.mesures_charge") : t("acc.pas_capteurs")}</div>`;
     const o = new CSS2DObject(d); o.position.set(0, 6, 0); g.add(o);
     serres.push({ sid, g, d, cible: TAILLE, actif: s.actif });
     if (s.actif) resume(sid, d.querySelector(".v"));
@@ -301,9 +308,10 @@ async function resume(sid, el) {
     const frais = rs.filter(r => r.date && Date.now() - new Date(r.date) < 30 * 60000);
     const moy = k => { const v = frais.filter(r => r.location !== "outside").map(r => r.values?.[k]).filter(x => x != null);
       return v.length ? v.reduce((a, b) => a + b) / v.length : null; };
-    const t = moy("temp"), hr = moy("humid");
-    el.textContent = `${frais.length}/${rs.length} capteurs actifs` + (t != null ? ` · T air ${t.toFixed(1)} °C` : "") + (hr != null ? ` · HR ${hr.toFixed(0)} %` : "");
-  } catch { el.textContent = "Mesures indisponibles"; }
+    const ta = moy("temp"), hr = moy("humid");
+    const nb = x => x.toLocaleString(document.documentElement.lang, { maximumFractionDigits: 1, minimumFractionDigits: 1 });
+    el.textContent = t("acc.actifs", { n: frais.length, tot: rs.length }) + (ta != null ? ` · ${t("acc.t_air")} ${nb(ta)} °C` : "") + (hr != null ? ` · ${t("acc.hr")} ${hr.toFixed(0)} %` : "");
+  } catch { el.textContent = t("acc.indispo"); }
 }
 
 // ---------- survol et clic ----------
@@ -314,7 +322,7 @@ renderer.domElement.addEventListener("pointerleave", () => souris.set(-9, -9));
 renderer.domElement.addEventListener("pointerdown", e => { bas = [e.clientX, e.clientY]; });
 renderer.domElement.addEventListener("pointerup", e => {
   if (bas && Math.hypot(e.clientX - bas[0], e.clientY - bas[1]) < 5 && survol
-      && serres.find(s => s.sid === survol)?.actif) location.href = `/serre#${survol}`;
+      && serres.find(s => s.sid === survol)?.actif) location.href = avecLangue(`/serre#${survol}`);
 });
 function majSurvol() {
   ray.setFromCamera(souris, camera);
@@ -337,7 +345,7 @@ function majSurvol() {
     document.getElementById("chargement").remove();
   } catch (e) {
     console.error("relief", e);
-    document.getElementById("chargement").textContent = `Relief indisponible (${e.message || e}) : carte plate.`;
+    document.getElementById("chargement").textContent = t("acc.relief_ko", { msg: e.message || e });
     const plan = new THREE.Mesh(new THREE.PlaneGeometry(W, H).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0xcfd6c4 }));
     scene.add(plan);
   }

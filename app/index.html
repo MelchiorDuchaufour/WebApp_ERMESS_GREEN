@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Serre Bocage 3D</title>
+<title data-i18n="serre.titre_page">Serre 3D · ERMESS Green</title>
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
 <script type="importmap">
 { "imports": {
@@ -84,6 +84,9 @@ h2{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--mute
   transition:transform .15s ease,box-shadow .15s ease}
 .partenaires a:hover img{transform:translateY(-2px);box-shadow:0 3px 10px rgba(0,0,0,.18)}
 .entete a img{transition:transform .15s ease} .entete a:hover img{transform:scale(1.06)}
+#langue{display:flex;gap:2px;margin-left:auto;align-self:flex-start;border:1px solid var(--line);border-radius:8px;padding:2px}
+#langue button{font:600 11px/1 system-ui,sans-serif;border:0;background:transparent;color:var(--muted);padding:5px 7px;border-radius:6px;cursor:pointer}
+#langue button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
 .forme{display:inline-block;width:12px;text-align:center;font-size:11px;color:var(--muted)}
 /* --- barre d'onglets latérale --- */
 #rail{position:fixed;left:0;top:0;bottom:0;width:86px;z-index:20;background:var(--panel);border-right:1px solid var(--line);
@@ -112,24 +115,24 @@ h2{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--mute
 </style>
 </head>
 <body>
-<nav id="rail" role="tablist" aria-label="Onglets">
-  <a class="accueil" href="/" title="Carte des serres"><img src="/logos/ermess_green_transparent.png" alt="ERMESS Green"></a>
-  <button role="tab" data-onglet="suivi" aria-selected="true" title="Capteurs en temps réel dans la serre 3D">
-    <svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9H3z"/><circle cx="9" cy="14" r="1.6"/><circle cx="15" cy="12" r="1.6"/></svg>Suivi</button>
-  <button role="tab" data-onglet="pv" hidden title="Potentiel photovoltaïque en toiture">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="6" r="3"/><path d="M4 21l3-8h10l3 8z"/><path d="M12 13v8M5.5 17h13"/></svg>Potentiel PV<span class="pastille-prev">aperçu</span></button>
-  <button role="tab" data-onglet="energie" title="Besoins de chauffage">
-    <svg viewBox="0 0 24 24"><path d="M12 3c3 4 5 6 5 10a5 5 0 0 1-10 0c0-2 1-4 2-5 0 2 1 3 2 3 0-3-1-5 1-8z"/></svg>Énergie<span class="pastille-prev">aperçu</span></button>
-  <button role="tab" data-onglet="renovation" title="Gains d'efficacité par rénovation">
-    <svg viewBox="0 0 24 24"><path d="M4 20h16M6 20V10l6-5 6 5v10"/><path d="M10 20v-5h4v5"/><path d="M17 4l3 3"/></svg>Rénovation<span class="pastille-prev">aperçu</span></button>
-  <button role="tab" data-onglet="controle" title="Écrans, ouvrants, chauffage">
-    <svg viewBox="0 0 24 24"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>Contrôle<span class="pastille-prev">aperçu</span></button>
+<nav id="rail" role="tablist" aria-label="Onglets" data-i18n-aria="rail.onglets">
+  <a class="accueil" href="/" title="Carte des serres" data-i18n-title="rail.carte"><img src="/logos/ermess_green_transparent.png" alt="ERMESS Green"></a>
+  <button role="tab" data-onglet="suivi" aria-selected="true" data-i18n-title="rail.suivi_t">
+    <svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9H3z"/><circle cx="9" cy="14" r="1.6"/><circle cx="15" cy="12" r="1.6"/></svg><span data-i18n="rail.suivi">Suivi</span></button>
+  <button role="tab" data-onglet="pv" hidden data-i18n-title="rail.pv_t">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="6" r="3"/><path d="M4 21l3-8h10l3 8z"/><path d="M12 13v8M5.5 17h13"/></svg><span data-i18n="rail.pv">Potentiel PV</span><span class="pastille-prev" data-i18n="commun.apercu">aperçu</span></button>
+  <button role="tab" data-onglet="energie" data-i18n-title="rail.energie_t">
+    <svg viewBox="0 0 24 24"><path d="M12 3c3 4 5 6 5 10a5 5 0 0 1-10 0c0-2 1-4 2-5 0 2 1 3 2 3 0-3-1-5 1-8z"/></svg><span data-i18n="rail.energie">Énergie</span><span class="pastille-prev" data-i18n="commun.apercu">aperçu</span></button>
+  <button role="tab" data-onglet="renovation" data-i18n-title="rail.renovation_t">
+    <svg viewBox="0 0 24 24"><path d="M4 20h16M6 20V10l6-5 6 5v10"/><path d="M10 20v-5h4v5"/><path d="M17 4l3 3"/></svg><span data-i18n="rail.renovation">Rénovation</span><span class="pastille-prev" data-i18n="commun.apercu">aperçu</span></button>
+  <button role="tab" data-onglet="controle" data-i18n-title="rail.controle_t">
+    <svg viewBox="0 0 24 24"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg><span data-i18n="rail.controle">Contrôle</span><span class="pastille-prev" data-i18n="commun.apercu">aperçu</span></button>
 </nav>
 <div id="cadre"><iframe id="cadre-if" title="Onglet"></iframe></div>
 <div id="app">
   <div id="vue">
     <div id="barre">
-      <select id="variable" aria-label="Variable affichée">
+      <select id="variable" aria-label="Variable affichée" data-i18n-aria="serre.variable">
         <option value="temp">T° air</option>
         <option value="humid">Humidité relative</option>
         <option value="vpd">VPD air</option>
@@ -143,9 +146,9 @@ h2{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--mute
         <option value="pore_ec">CE de la solution du sol (SoilPro+)</option>
         <option value="vbat">Batterie</option>
       </select>
-      <button id="b-toit" aria-pressed="true">Toit et vitrage</button>
-      <button id="b-dessus" aria-pressed="false">Vue de dessus</button>
-      <button id="b-edit" aria-pressed="false">Placer les capteurs</button>
+      <button id="b-toit" aria-pressed="true" data-i18n="serre.toit">Toit et vitrage</button>
+      <button id="b-dessus" aria-pressed="false" data-i18n="serre.dessus">Vue de dessus</button>
+      <button id="b-edit" aria-pressed="false" data-i18n="serre.placer">Placer les capteurs</button>
     </div>
     <div id="bandeau"></div>
     <div id="legende">
@@ -156,30 +159,31 @@ h2{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--mute
   </div>
   <aside>
     <div class="entete">
-      <a id="logo-ermess" href="#" target="_blank" rel="noopener" title="En savoir plus sur le projet ERMESS Green"><img src="/logos/ermess_green_transparent.png" alt="ERMESS Green"></a>
-      <div><h1>Capteurs Sigrow en 3D</h1><div class="aide"><a href="/" style="color:var(--accent)">← Carte des serres</a> ·
-        <a id="plus-ermess" href="#" target="_blank" rel="noopener" style="color:var(--accent)">En savoir plus sur ERMESS Green ↗</a></div></div>
+      <a id="logo-ermess" href="#" target="_blank" rel="noopener" data-i18n-title="commun.ermess_titre"><img src="/logos/ermess_green_transparent.png" alt="ERMESS Green"></a>
+      <div><h1 data-i18n="serre.h1">Capteurs Sigrow en 3D</h1><div class="aide"><a id="retour" href="/" style="color:var(--accent)" data-i18n="serre.retour">← Carte des serres</a> ·
+        <a id="plus-ermess" href="#" target="_blank" rel="noopener" style="color:var(--accent)" data-i18n="commun.ermess_plus_long">En savoir plus sur ERMESS Green ↗</a></div></div>
+      <div id="langue"></div>
     </div>
-    <select id="site" aria-label="Site"></select>
-    <div class="sous" id="statut">Chargement…</div>
-    <h2>Capteurs</h2>
+    <select id="site" aria-label="Site" data-i18n-aria="serre.site"></select>
+    <div class="sous" id="statut" data-i18n="serre.chargement">Chargement…</div>
+    <h2 data-i18n="serre.capteurs">Capteurs</h2>
     <ul id="liste"></ul>
     <div class="aide" id="aide-non-places"></div>
-    <h2>Détail</h2>
-    <div id="detail"><div class="aide">Clique un capteur dans la scène ou la liste.</div></div>
+    <h2 data-i18n="serre.detail">Détail</h2>
+    <div id="detail"><div class="aide" data-i18n="serre.clique">Clique un capteur dans la scène ou la liste.</div></div>
     <div id="edition">
-      <div class="aide" id="ed-aide">Clique dans la scène pour poser le capteur (x, y), puis ajuste la hauteur.</div>
+      <div class="aide" id="ed-aide" data-i18n="serre.ed_aide0">Clique dans la scène pour poser le capteur (x, y), puis ajuste la hauteur.</div>
       <div style="margin-top:6px">
         <label>x <input type="number" step="0.1" id="ed-x"></label>
         <label>y <input type="number" step="0.1" id="ed-y"></label>
         <label>z <input type="number" step="0.05" id="ed-z"></label>
       </div>
-      <button id="ed-save">Enregistrer les positions</button>
-      <button id="ed-annul" class="second">Annuler</button>
+      <button id="ed-save" data-i18n="serre.ed_save">Enregistrer les positions</button>
+      <button id="ed-annul" class="second" data-i18n="serre.annuler">Annuler</button>
       <div class="aide" id="ed-msg"></div>
     </div>
     <div class="partenaires">
-      <div class="aide" style="margin-bottom:6px">Partenaires</div>
+      <div class="aide" style="margin-bottom:6px" data-i18n="commun.partenaires">Partenaires</div>
       <div id="partenaires"></div>
     </div>
   </aside>
@@ -191,16 +195,24 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { CSS2DRenderer, CSS2DObject } from "three/addons/renderers/CSS2DRenderer.js";
 import { ERMESS, remplirPartenaires } from "/logos/liens.js";
+import { t, appliquer, selecteurLangue, champSite, libelle, avecLangue, LOCALE, SEPARATEURS } from "/onglets/i18n.js";
+appliquer(); selecteurLangue(document.getElementById("langue"));
+document.getElementById("retour").href = avecLangue("/");
+document.querySelector("#rail a.accueil").href = avecLangue("/");
+for (const o of document.getElementById("variable").options) {
+  const base = o.textContent.match(/\((.+)\)$/); o.textContent = t("var." + o.value) + (base ? ` (${base[1]})` : "");
+}
 document.getElementById("logo-ermess").href = document.getElementById("plus-ermess").href = ERMESS;
 remplirPartenaires(document.getElementById("partenaires"));
 
-const VARS = {
+const VARS_ = {
   temp:{l:"T° air",u:"°C",d:1}, humid:{l:"Humidité relative",u:"%",d:0}, vpd:{l:"VPD air",u:"kPa",d:2},
   par:{l:"PAR",u:"µmol/m²/s",d:0}, pixel_object1_temp:{l:"T° feuille",u:"°C",d:1},
   vpd_plant:{l:"VPD plante",u:"kPa",d:2}, t_dew:{l:"Point de rosée",u:"°C",d:1}, vbat:{l:"Batterie",u:"%",d:0},
   g_water:{l:"Humidité absolue",u:"g/m³",d:1}, dli:{l:"DLI",u:"mol/m²",d:1}, co2:{l:"CO₂",u:"ppm",d:0},
   soil_hum:{l:"Humidité du sol",u:"%",d:1}, soil_temp:{l:"T° du sol",u:"°C",d:1}, pore_ec:{l:"CE solution du sol",u:"mS/cm",d:2},
 };
+const VARS = Object.fromEntries(Object.entries(VARS_).map(([k, v]) => [k, { ...v, l: t("var." + k) }]));
 const VIEUX_MIN = 30;                 // au-delà : capteur considéré hors ligne
 const POLL_MS = 60_000;
 // viridis (8 arrêts)
@@ -252,7 +264,7 @@ function chargerDecor(st) {
         else cliquables.push(o);
       });
       MODELE = g.scene; scene.add(MODELE);
-    }, undefined, () => bandeau(`Maquette ${st.modele} introuvable : lancer export_glb.py dans Blender.`));
+    }, undefined, () => bandeau(t("serre.maquette_ko", { m: st.modele })));
   } else {
     // pas de maquette : emprise au sol + grille de 1 m
     const [L, P] = st.emprise || [20, 20];
@@ -298,14 +310,14 @@ function ageMin(rid) {
   const d = LAT.remotes[rid]?.date; return d ? (Date.now() - new Date(d).getTime()) / 60000 : Infinity;
 }
 function fmtAge(m) {
-  if (!isFinite(m)) return "jamais"; if (m < 1) return "à l'instant"; if (m < 60) return `il y a ${Math.round(m)} min`;
-  if (m < 2880) return `il y a ${Math.round(m / 60)} h`; return `il y a ${Math.round(m / 1440)} j`;
+  if (!isFinite(m)) return t("age.jamais"); if (m < 1) return t("age.instant"); if (m < 60) return t("age.min", { n: Math.round(m) });
+  if (m < 2880) return t("age.h", { n: Math.round(m / 60) }); return t("age.j", { n: Math.round(m / 1440) });
 }
 const typeDe = rid => { const t = (LAT.remotes[rid]?.type || "").toLowerCase(); return GEO[t] ? t : "air"; };
 const unite = (k = VAR) => Object.values(LAT.remotes).map(r => r.units?.[k]).find(Boolean)?.replace("g/m3", "g/m³") || VARS[k]?.u || "";
 const valeur = rid => (ageMin(rid) > VIEUX_MIN ? null : LAT.remotes[rid]?.values?.[VAR] ?? null);
-const fmt = (v, k = VAR) => v == null ? "—" : v.toFixed(VARS[k]?.d ?? 1);
-const nomCourt = rid => (POS.capteurs[rid]?.label || LAT.remotes[rid]?.name || rid);
+const fmt = (v, k = VAR) => v == null ? "—" : v.toLocaleString(LOCALE, { minimumFractionDigits: VARS[k]?.d ?? 1, maximumFractionDigits: VARS[k]?.d ?? 1, useGrouping: false });
+const nomCourt = rid => libelle(POS.capteurs[rid]?.label || LAT.remotes[rid]?.name || rid);
 
 function bornes() {
   const vs = Object.keys(POS.capteurs).map(valeur).filter(v => v != null);
@@ -340,7 +352,7 @@ function majScene() {
     m.mesh.scale.setScalar(rid === SEL ? 1.35 : 1);
     const dessous = Object.entries(POS.capteurs).some(([r2, q]) => r2 !== rid && q.z > p.z && Math.hypot(q.x - p.x, q.y - p.y) < 1.5);
     m.div.className = "etiq" + (v == null ? " off" : "") + (dessous ? " bas" : "");
-    m.div.textContent = `${nomCourt(rid)} · ${v == null ? (ageMin(rid) > VIEUX_MIN ? "hors ligne" : "—") : fmt(v) + " " + unite()}`;
+    m.div.textContent = `${nomCourt(rid)} · ${v == null ? (ageMin(rid) > VIEUX_MIN ? t("serre.hors_ligne") : "—") : fmt(v) + " " + unite()}`;
   }
   const V = VARS[VAR];
   document.getElementById("leg-titre").textContent = `${V.l} (${unite()})`;
@@ -357,7 +369,7 @@ function majListe(lo, hi) {
     li.className = rid === SEL ? "sel" : "";
     const c = v == null ? "var(--off)" : "#" + coul((v - lo) / (hi - lo)).getHexString();
     li.innerHTML = `<span class="pastille ${typeDe(rid) === "pixel" ? "pixel" : ""}" style="background:${c}"></span>
-      <span class="nom">${nomCourt(rid)}${POS.capteurs[rid].a_valider ? ' <span class="avalider">· position à valider</span>' : ""}
+      <span class="nom">${nomCourt(rid)}${POS.capteurs[rid].a_valider ? ` <span class="avalider">· ${t("serre.a_valider")}</span>` : ""}
       <span class="age ${a > VIEUX_MIN ? "vieux" : ""}">${TYPES[typeDe(rid)][0]} ${rid} · c.${LAT.remotes[rid]?.central ?? "?"} · ${fmtAge(a)}</span></span>
       <span class="val">${fmt(v)}</span>`;
     li.onclick = () => choisir(rid);
@@ -366,7 +378,7 @@ function majListe(lo, hi) {
   const nonPlaces = Object.keys(LAT.remotes).filter(r => !POS.capteurs[r]);
   const aide = document.getElementById("aide-non-places"); aide.innerHTML = "";
   if (nonPlaces.length) {
-    aide.textContent = "Non placés : ";
+    aide.textContent = t("serre.non_places");
     nonPlaces.forEach(r => {
       const b = document.createElement("button"); b.textContent = `${LAT.remotes[r].name}`;
       b.style.cssText = "font:inherit;font-size:12px;margin:2px;padding:2px 6px;border-radius:4px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer";
@@ -383,10 +395,10 @@ async function choisir(rid) {
   const lignes = Object.keys(VARS).filter(k => vals[k] != null)
     .map(k => `<tr><td>${VARS[k].l}</td><td>${fmt(vals[k], k)} ${(r.units?.[k] || VARS[k].u).replace("g/m3", "g/m³")}</td></tr>`).join("");
   document.getElementById("detail").innerHTML = `
-    <div><b>${r.name || rid}</b></div>
-    <div class="aide">Mesure ${fmtAge(ageMin(rid))}${r.date ? " (" + r.date.slice(0, 16).replace("T", " ") + ")" : ""}
+    <div><b>${libelle(r.name) || rid}</b></div>
+    <div class="aide">${t("serre.mesure", { age: fmtAge(ageMin(rid)) })}${r.date ? " (" + r.date.slice(0, 16).replace("T", " ") + ")" : ""}
       · x ${p.x.toFixed(1)} y ${p.y.toFixed(1)} z ${p.z.toFixed(2)} m</div>
-    <table>${lignes || '<tr><td class="aide">Aucune valeur</td><td></td></tr>'}</table>
+    <table>${lignes || `<tr><td class="aide">${t("serre.aucune")}</td><td></td></tr>`}</table>
     <div id="courbe"></div>`;
   majEdition();
   try {
@@ -394,7 +406,7 @@ async function choisir(rid) {
     const s = j.series?.[rid]; if (!s || !s.t.length || SEL !== rid) return;
     const css = getComputedStyle(document.documentElement);
     Plotly.newPlot("courbe", [{ x: s.t, y: s.y, mode: "lines", line: { color: css.getPropertyValue("--accent"), width: 1.8 } }],
-      { margin: { l: 38, r: 8, t: 22, b: 30 }, title: { text: `${VARS[VAR].l} (${unite()}) · 48 h`, font: { size: 12 } },
+      { margin: { l: 38, r: 8, t: 22, b: 30 }, title: { text: t("serre.courbe", { v: VARS[VAR].l, u: unite() }), font: { size: 12 } }, separators: SEPARATEURS,
         paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
         font: { color: css.getPropertyValue("--ink"), size: 11 },
         xaxis: { gridcolor: css.getPropertyValue("--line") }, yaxis: { gridcolor: css.getPropertyValue("--line"), ticksuffix: " " } },
@@ -430,8 +442,8 @@ function majEdition() {
   if (!EDIT) return;
   const p = SEL && POS.capteurs[SEL];
   document.getElementById("ed-aide").textContent = p
-    ? `${nomCourt(SEL)} : clique dans la scène pour le poser (x, y), puis ajuste la hauteur z.`
-    : "Choisis un capteur dans la liste.";
+    ? t("serre.ed_aide", { nom: nomCourt(SEL) })
+    : t("serre.ed_choisir");
   for (const k of ["x", "y", "z"]) {
     const inp = document.getElementById("ed-" + k); inp.disabled = !p; inp.value = p ? p[k] : "";
     inp.oninput = () => { if (!p || inp.value === "") return; p[k] = +inp.value; p.a_valider = false; majScene(); };
@@ -445,14 +457,14 @@ function basculerEdition(on) {
 document.getElementById("b-edit").onclick = () => basculerEdition(!EDIT);
 document.getElementById("ed-annul").onclick = () => { if (AVANT_EDIT) POS.capteurs = AVANT_EDIT; basculerEdition(false); majScene(); };
 document.getElementById("ed-save").onclick = async () => {
-  const msg = document.getElementById("ed-msg"); msg.textContent = "Enregistrement…";
+  const msg = document.getElementById("ed-msg"); msg.textContent = t("serre.enreg");
   try {
     const r = await fetch(api("/api/capteurs"), { method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ capteurs: POS.capteurs }) });
     const j = await r.json(); if (!r.ok) throw new Error(j.error);
     POS = j; AVANT_EDIT = JSON.parse(JSON.stringify(POS.capteurs));
-    msg.textContent = `Enregistré (${j.maj}) dans ${SITES[SITE].positions}`; majScene();
-  } catch (e) { msg.textContent = "Échec : " + e.message; }
+    msg.textContent = t("serre.enregistre", { maj: j.maj, f: SITES[SITE].positions }); majScene();
+  } catch (e) { msg.textContent = t("commun.echec", { msg: e.message }); }
 };
 
 // ---------- boutons de vue ----------
@@ -486,11 +498,12 @@ async function rafraichir() {
     majOptions();
     const n = Object.keys(POS.capteurs).length, off = Object.keys(POS.capteurs).filter(r => ageMin(r) > VIEUX_MIN).length;
     document.getElementById("statut").textContent =
-      `Central ${(l.centrals || []).join(" + ")} · ${Object.keys(l.remotes).length} capteurs · ${n} placés${off ? ` · ${off} hors ligne` : ""} · mis à jour ${l.updated.slice(11, 16)}`;
+      t("serre.statut", { c: (l.centrals || []).join(" + "), n: Object.keys(l.remotes).length, p: n,
+        off: off ? t("serre.statut_off", { n: off }) : "", h: l.updated.slice(11, 16) });
     bandeau(l.erreur ? l.erreur
-      : Object.values(POS.capteurs).some(c => c.a_valider) ? "Positions provisoires : à valider avec « Placer les capteurs »" : "");
+      : Object.values(POS.capteurs).some(c => c.a_valider) ? t("serre.provisoires") : "");
     majScene();
-  } catch (e) { document.getElementById("statut").textContent = "Erreur API : " + e.message; }
+  } catch (e) { document.getElementById("statut").textContent = t("serre.erreur_api", { msg: e.message }); }
 }
 function majOptions() {
   // n'affiche que les variables mesurées sur ce site
@@ -505,8 +518,8 @@ function changerSite(sid) {
   history.replaceState(null, "", "#" + sid);
   for (const rid of Object.keys(marqueurs)) { scene.remove(marqueurs[rid].mesh, marqueurs[rid].tige); marqueurs[rid].div.remove(); delete marqueurs[rid]; }
   POS = { capteurs: {} }; LAT = { remotes: {} };
-  document.getElementById("detail").innerHTML = '<div class="aide">Clique un capteur dans la scène ou la liste.</div>';
-  document.getElementById("liste").innerHTML = ""; document.getElementById("statut").textContent = "Chargement…";
+  document.getElementById("detail").innerHTML = `<div class="aide">${t("serre.clique")}</div>`;
+  document.getElementById("liste").innerHTML = ""; document.getElementById("statut").textContent = t("serre.chargement");
   chargerDecor(SITES[sid]); rafraichir();
 }
 // ---------- onglets latéraux ----------
@@ -519,7 +532,7 @@ function ouvrirOnglet(o) {
   labels.domElement.style.display = o === "suivi" ? "" : "none";   // sinon les étiquettes 3D débordent
   if (o === "suivi") { cadre.style.display = "none"; }
   else {
-    const url = `/onglets/${o}.html?site=${encodeURIComponent(SITE || "bocage")}`;
+    const url = avecLangue(`/onglets/${o}.html?site=${encodeURIComponent(SITE || "bocage")}`);
     if (ifr.dataset.url !== url) { ifr.src = url; ifr.dataset.url = url; }
     cadre.style.display = "block";
   }
@@ -532,7 +545,7 @@ document.querySelectorAll("#rail button").forEach(b => b.onclick = () => ouvrirO
   SITES = await (await fetch("/api/sites")).json();
   const sel = document.getElementById("site");
   SITES = Object.fromEntries(Object.entries(SITES).filter(([, st]) => st.actif));
-  for (const [sid, st] of Object.entries(SITES)) sel.add(new Option(st.nom, sid));
+  for (const [sid, st] of Object.entries(SITES)) sel.add(new Option(champSite(st, "nom"), sid));
   let s0 = location.hash.slice(1); try { s0 = s0 || localStorage.getItem("bocage3d.site"); } catch {}
   if (!SITES[s0]) s0 = Object.keys(SITES)[0];
   sel.value = s0; sel.onchange = e => changerSite(e.target.value);

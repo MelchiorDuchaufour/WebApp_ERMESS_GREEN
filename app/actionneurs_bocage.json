@@ -1,11 +1,11 @@
 {
   "ecrans": [
-    1.0,
-    0.5,
-    0.0
+    0.6,
+    0.6,
+    0.6
   ],
-  "ouvrants_deg": 30.0,
-  "chauffage": 0.8,
-  "source": "test",
-  "maj": "2026-11-03 11:48:21"
+  "ouvrants_deg": 35.0,
+  "chauffage": 0.0,
+  "source": "préréglage jour chaud",
+  "maj": "2026-11-04 12:21:31"
 }

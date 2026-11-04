@@ -22,6 +22,16 @@
       "lon": 5.935,
       "nefs": 3,
       "description": "Grande serre multi-chapelles en verre, 1020 m², 41 tablettes"
+    },
+    "traductions": {
+      "it": {
+        "description": "Grande serra multi-campata in vetro, 1020 m², 41 bancali",
+        "nom": "Serra Rigerie · Bocage"
+      },
+      "en": {
+        "description": "Large glass multi-span greenhouse, 1,020 m², 41 benches",
+        "nom": "Rigerie greenhouse · Bocage"
+      }
     }
   },
   "savona": {
@@ -35,6 +45,16 @@
       "lon": 8.477,
       "nefs": 2,
       "description": "Calibration du pipeline vision (LAI)"
+    },
+    "traductions": {
+      "it": {
+        "nom": "Sito pilota di Savona",
+        "description": "Calibrazione della pipeline di visione (LAI)"
+      },
+      "en": {
+        "nom": "Savona pilot site",
+        "description": "Vision pipeline calibration (LAI)"
+      }
     }
   }
 }
