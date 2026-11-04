@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ERMESS Green · Serres</title>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<style>
+:root{
+  --ciel-haut:#dfeaf1; --ciel-bas:#f6f4ee; --ink:#1d2321; --muted:#5f6a65; --carte:#ffffff;
+  --line:#dfe3df; --accent:#2f7d4f; --fr:#3b6fb6; --it:#2f9e5a;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ciel-haut:#101820; --ciel-bas:#1b2420; --ink:#e7ebe8; --muted:#9aa5a0; --carte:#1d2220; --line:#2e3532;
+    --accent:#5fbf86; --fr:#7aa5e6; --it:#6fd39a;
+  }
+}
+:root[data-theme="dark"]{
+  --ciel-haut:#101820; --ciel-bas:#1b2420; --ink:#e7ebe8; --muted:#9aa5a0; --carte:#1d2220; --line:#2e3532;
+  --accent:#5fbf86; --fr:#7aa5e6; --it:#6fd39a;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;color:var(--ink);
+  background:linear-gradient(180deg,var(--ciel-haut),var(--ciel-bas));
+  font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+#scene{position:fixed;inset:0}
+#logo{position:fixed;top:14px;left:18px;z-index:5;display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit}
+#logo{flex-direction:column;gap:2px}
+#logo img{height:92px;width:auto;filter:drop-shadow(0 1px 2px rgba(255,255,255,.6));transition:transform .15s ease}
+#logo .plus{font-size:12px;font-weight:600;color:var(--accent);background:color-mix(in srgb,var(--carte) 80%,transparent);
+  padding:1px 8px;border-radius:10px;opacity:.85;transition:opacity .15s ease}
+#logo:hover img{transform:scale(1.06)} #logo:hover .plus{opacity:1;text-decoration:underline}
+#titre{position:fixed;top:22px;left:50%;transform:translateX(-50%);z-index:5;text-align:center;pointer-events:none}
+#titre h1{margin:0;font-size:22px;letter-spacing:.01em}
+#titre p{margin:2px 0 0;color:var(--muted);font-size:13px}
+#chargement{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);color:var(--muted);z-index:4}
+.ville{font-size:11px;color:#2b302d;background:rgba(255,255,255,.75);padding:1px 5px;border-radius:3px;
+  white-space:nowrap;pointer-events:none;margin-top:-14px}
+.ville::before{content:"";position:absolute;left:50%;top:100%;width:5px;height:5px;margin-left:-2.5px;margin-top:2px;
+  border-radius:50%;background:#2b302d}
+.pays{font:700 15px/1 system-ui,sans-serif;letter-spacing:.35em;color:rgba(30,40,35,.55);pointer-events:none;
+  text-shadow:0 0 6px rgba(255,255,255,.8)}
+.fiche{background:var(--carte);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:8px 11px;
+  min-width:190px;box-shadow:0 4px 14px rgba(0,0,0,.18);pointer-events:none;margin-top:-70px;
+  transition:transform .15s ease,opacity .15s ease;opacity:.92}
+.fiche.survol{transform:scale(1.08);opacity:1}
+.fiche b{display:block;font-size:13px}
+.fiche .l{font-size:12px;color:var(--muted)}
+.fiche .v{font-variant-numeric:tabular-nums;font-size:12px;margin-top:3px}
+.fiche .drapeau{display:inline-block;font-size:10px;font-weight:700;color:#fff;border-radius:3px;padding:0 4px;margin-right:4px}
+.fiche .conf{color:#b5651d;font-size:11px}
+#aide{position:fixed;left:50%;bottom:92px;transform:translateX(-50%);z-index:5;color:var(--muted);font-size:12px;
+  background:color-mix(in srgb,var(--carte) 80%,transparent);padding:4px 10px;border-radius:12px}
+#partenaires{position:fixed;left:0;right:0;bottom:0;z-index:5;display:flex;gap:28px;justify-content:center;align-items:center;
+  flex-wrap:wrap;padding:14px 24px;background:color-mix(in srgb,var(--carte) 88%,transparent);border-top:1px solid var(--line)}
+#partenaires img{height:50px;max-width:170px;object-fit:contain;background:#fff;border-radius:6px;padding:4px 8px;display:block;
+  transition:transform .15s ease,box-shadow .15s ease}
+#partenaires a:hover img{transform:translateY(-2px) scale(1.05);box-shadow:0 3px 10px rgba(0,0,0,.18)}
+#source{position:fixed;right:10px;bottom:84px;z-index:5;font-size:10px;color:var(--muted)}
+@media (max-width:720px){
+  #logo img{height:64px}
+  #titre{top:auto;bottom:118px;width:calc(100% - 32px)}
+  #titre h1{font-size:17px}
+  #partenaires{gap:12px;padding:8px}
+  #partenaires img{height:30px}
+  #aide{bottom:64px}
+}
+</style>
+</head>
+<body>
+<div id="scene"></div>
+<a id="logo" href="#" target="_blank" rel="noopener" title="En savoir plus sur le projet ERMESS Green">
+  <img src="/logos/ermess_green_transparent.png" alt="ERMESS Green"><span class="plus">En savoir plus ↗</span></a>
+<div id="titre"><h1>Serres instrumentées France – Italie</h1><p>Capteurs Sigrow en temps réel · Interreg Alcotra ERMESS Green</p></div>
+<div id="chargement">Chargement du relief…</div>
+<div id="aide">Survole une serre, clique pour l'ouvrir · glisser pour tourner, molette pour zoomer</div>
+<div id="source">Relief : Mapzen Terrarium (AWS) · Frontières : Natural Earth</div>
+<div id="partenaires"></div>
+
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { CSS2DRenderer, CSS2DObject } from "three/addons/renderers/CSS2DRenderer.js";
+import { ERMESS, remplirPartenaires } from "/logos/liens.js";
+document.getElementById("logo").href = ERMESS;
+remplirPartenaires(document.getElementById("partenaires"));
+
+// ---------- emprise et projection (équirectangulaire locale, 1 unité = 1 km) ----------
+const B = { lonMin: 4.7, lonMax: 10.0, latMin: 43.25, latMax: 46.75 };
+const LAT0 = (B.latMin + B.latMax) / 2, LON0 = (B.lonMin + B.lonMax) / 2;
+const KX = 111.32 * Math.cos(LAT0 * Math.PI / 180), KY = 110.57;
+const W = (B.lonMax - B.lonMin) * KX, H = (B.latMax - B.latMin) * KY;
+const EXAG = 6;                       // exagération verticale du relief
+const px = lon => (lon - LON0) * KX, pz = lat => -(lat - LAT0) * KY;
+
+// ---------- relief : tuiles Terrarium z7 ----------
+const Z = 7, N = 2 ** Z;
+const tX = lon => (lon + 180) / 360 * N;
+const tY = lat => { const r = lat * Math.PI / 180; return (1 - Math.asinh(Math.tan(r)) / Math.PI) / 2 * N; };
+const x0 = Math.floor(tX(B.lonMin)), x1 = Math.floor(tX(B.lonMax));
+const y0 = Math.floor(tY(B.latMax)), y1 = Math.floor(tY(B.latMin));
+let ELEV = null, EW = 0, EH = 0;
+async function chargerRelief() {
+  EW = (x1 - x0 + 1) * 256; EH = (y1 - y0 + 1) * 256;
+  const cv = new OffscreenCanvas(EW, EH), ctx = cv.getContext("2d");
+  const jobs = [];
+  for (let x = x0; x <= x1; x++) for (let y = y0; y <= y1; y++) jobs.push((async () => {
+    const r = await fetch(`https://s3.amazonaws.com/elevation-tiles-prod/terrarium/${Z}/${x}/${y}.png`);
+    ctx.drawImage(await createImageBitmap(await r.blob()), (x - x0) * 256, (y - y0) * 256);
+  })());
+  await Promise.all(jobs);
+  const d = ctx.getImageData(0, 0, EW, EH).data;
+  ELEV = new Float32Array(EW * EH);
+  for (let i = 0; i < EW * EH; i++) ELEV[i] = d[4 * i] * 256 + d[4 * i + 1] + d[4 * i + 2] / 256 - 32768;
+}
+function altitude(lon, lat) {            // m, interpolation bilinéaire
+  if (!ELEV) return 0;
+  const fx = (tX(lon) - x0) * 256, fy = (tY(lat) - y0) * 256;
+  const i = Math.max(0, Math.min(EW - 2, Math.floor(fx))), j = Math.max(0, Math.min(EH - 2, Math.floor(fy)));
+  const u = fx - i, v = fy - j, e = (a, b) => ELEV[b * EW + a];
+  return (e(i, j) * (1 - u) + e(i + 1, j) * u) * (1 - v) + (e(i, j + 1) * (1 - u) + e(i + 1, j + 1) * u) * v;
+}
+const hauteur = (lon, lat) => Math.max(0, altitude(lon, lat)) / 1000 * EXAG;
+
+// ---------- texture : couleurs d'altitude, mer, pays, frontières ----------
+const TW = 2048, TH = Math.round(TW * H / W);
+const lonDe = i => B.lonMin + (i / TW) * (B.lonMax - B.lonMin);
+const latDe = j => B.latMax - (j / TH) * (B.latMax - B.latMin);
+const RAMPE = [[0, [178, 196, 150]], [400, [196, 204, 160]], [900, [210, 200, 160]], [1600, [180, 160, 128]],
+               [2400, [150, 138, 120]], [3000, [222, 222, 222]], [4000, [255, 255, 255]]];
+function couleurAlt(h) {
+  if (h <= 0) return [168, 206, 226];
+  for (let k = 1; k < RAMPE.length; k++) if (h < RAMPE[k][0]) {
+    const [a, ca] = RAMPE[k - 1], [b, cb] = RAMPE[k], t = (h - a) / (b - a);
+    return ca.map((c, n) => c + (cb[n] - c) * t);
+  }
+  return RAMPE.at(-1)[1];
+}
+async function texture() {
+  const cv = document.createElement("canvas"); cv.width = TW; cv.height = TH;
+  const ctx = cv.getContext("2d"), img = ctx.createImageData(TW, TH);
+  for (let j = 0; j < TH; j++) {
+    const lat = latDe(j);
+    for (let i = 0; i < TW; i++) {
+      const c = couleurAlt(altitude(lonDe(i), lat)), o = 4 * (j * TW + i);
+      img.data[o] = c[0]; img.data[o + 1] = c[1]; img.data[o + 2] = c[2]; img.data[o + 3] = 255;
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+  // pays (Natural Earth 1:10 M)
+  const topo = await (await fetch("https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-10m.json")).json();
+  const pays = topojson.feature(topo, topo.objects.countries).features;
+  const proj = ([lon, lat]) => [(lon - B.lonMin) / (B.lonMax - B.lonMin) * TW, (B.latMax - lat) / (B.latMax - B.latMin) * TH];
+  const tracer = geom => {
+    const polys = geom.type === "Polygon" ? [geom.coordinates] : geom.type === "MultiPolygon" ? geom.coordinates : [];
+    for (const p of polys) for (const ring of p) ring.forEach((c, k) => { const [x, y] = proj(c); k ? ctx.lineTo(x, y) : ctx.moveTo(x, y); });
+  };
+  const TEINTE = { "250": "rgba(59,111,182,0.16)", "380": "rgba(47,158,90,0.16)", "756": "rgba(120,120,120,0.10)" };
+  for (const f of pays) if (TEINTE[f.id]) { ctx.beginPath(); tracer(f.geometry); ctx.fillStyle = TEINTE[f.id]; ctx.fill("evenodd"); }
+  // autres frontières : fines ; frontière franco-italienne : épaisse
+  const ligne = (filtre, largeur, couleur, tirets = []) => {
+    const m = topojson.mesh(topo, topo.objects.countries, filtre);
+    ctx.beginPath(); for (const l of m.coordinates) l.forEach((c, k) => { const [x, y] = proj(c); k ? ctx.lineTo(x, y) : ctx.moveTo(x, y); });
+    ctx.lineWidth = largeur; ctx.strokeStyle = couleur; ctx.setLineDash(tirets); ctx.lineJoin = "round"; ctx.stroke();
+  };
+  const FI = (a, b) => (a.id === "250" && b.id === "380") || (a.id === "380" && b.id === "250");
+  ligne((a, b) => a !== b && !FI(a, b), 2, "rgba(60,60,60,0.55)", [6, 4]);
+  ligne(FI, 7, "rgba(255,255,255,0.9)");
+  ligne(FI, 3.2, "rgba(190,40,50,0.95)");
+  return new THREE.CanvasTexture(cv);
+}
+
+// ---------- scène ----------
+const el = document.getElementById("scene");
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); el.appendChild(renderer.domElement);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+const css = new CSS2DRenderer(); css.domElement.style.cssText = "position:absolute;inset:0;pointer-events:none"; el.appendChild(css.domElement);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(35, 1, 1, 5000);
+camera.position.set(0, 330, 360);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true; controls.minDistance = 60; controls.maxDistance = 900;
+controls.maxPolarAngle = Math.PI * 0.42; controls.minPolarAngle = Math.PI * 0.08;
+controls.target.set(-10, 0, 10);
+scene.add(new THREE.HemisphereLight(0xffffff, 0x9aa58c, 1.5));
+const sun = new THREE.DirectionalLight(0xfff4e0, 2.2); sun.position.set(-300, 260, -120); scene.add(sun);
+function redim() { renderer.setSize(innerWidth, innerHeight); css.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); }
+addEventListener("resize", redim); redim();
+
+function terrain(tex) {
+  const SX = 360, SY = Math.round(SX * H / W);
+  const g = new THREE.PlaneGeometry(W, H, SX, SY); g.rotateX(-Math.PI / 2);
+  const p = g.attributes.position;
+  for (let k = 0; k < p.count; k++) {
+    const lon = p.getX(k) / KX + LON0, lat = -p.getZ(k) / KY + LAT0;
+    p.setY(k, hauteur(lon, lat));
+  }
+  g.computeVertexNormals();
+  tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
+  const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ map: tex, roughness: 0.95 }));
+  scene.add(m);
+  // socle : épaisseur sous la carte
+  const socle = new THREE.Mesh(new THREE.BoxGeometry(W, 6, H), new THREE.MeshStandardMaterial({ color: 0x8c8676, roughness: 1 }));
+  socle.position.y = -3.05; scene.add(socle);
+}
+
+function etiquette(html, cls, lon, lat, dy = 1.5) {
+  const d = document.createElement("div"); d.className = cls; d.innerHTML = html;
+  const o = new CSS2DObject(d); o.position.set(px(lon), hauteur(lon, lat) + dy, pz(lat)); scene.add(o); return d;
+}
+
+// ---------- mini-serre multi-chapelles ----------
+const verre = new THREE.MeshPhysicalMaterial({ color: 0xe6f4fb, transparent: true, opacity: 0.45, roughness: 0.1,
+  metalness: 0, side: THREE.DoubleSide, depthWrite: false });
+const acier = new THREE.LineBasicMaterial({ color: 0x3d4744 });
+function miniSerre(nefs, couleurPays) {
+  const g = new THREE.Group();
+  const L = 9, lN = 3, hM = 2, hF = 1.3;      // longueur, largeur d'une nef, mur, faîtage
+  const largeur = nefs * lN;
+  const forme = new THREE.Shape();
+  forme.moveTo(-largeur / 2, 0);
+  for (let n = 0; n < nefs; n++) {
+    const xa = -largeur / 2 + n * lN; forme.lineTo(xa, hM); forme.lineTo(xa + lN / 2, hM + hF); forme.lineTo(xa + lN, hM);
+  }
+  forme.lineTo(largeur / 2, 0); forme.lineTo(-largeur / 2, 0);
+  const geo = new THREE.ExtrudeGeometry(forme, { depth: L, bevelEnabled: false }); geo.translate(0, 0, -L / 2);
+  const corps = new THREE.Mesh(geo, verre); g.add(corps);
+  g.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo, 1), acier));
+  // montants et pannes
+  const pts = [];
+  for (let z = -L / 2; z <= L / 2 + 1e-6; z += L / 6) {
+    pts.push(-largeur / 2, 0, z, -largeur / 2, hM, z, largeur / 2, 0, z, largeur / 2, hM, z);
+    for (let n = 0; n < nefs; n++) { const xa = -largeur / 2 + n * lN;
+      pts.push(xa, hM, z, xa + lN / 2, hM + hF, z, xa + lN / 2, hM + hF, z, xa + lN, hM, z); }
+  }
+  const lg = new THREE.BufferGeometry(); lg.setAttribute("position", new THREE.Float32BufferAttribute(pts, 3));
+  g.add(new THREE.LineSegments(lg, acier));
+  // cultures à l'intérieur
+  const rang = new THREE.MeshStandardMaterial({ color: 0x4f9d55, roughness: 0.8 });
+  for (let n = 0; n < nefs; n++) {
+    const b = new THREE.Mesh(new THREE.BoxGeometry(lN * 0.55, 0.5, L * 0.8), rang);
+    b.position.set(-largeur / 2 + n * lN + lN / 2, 0.25, 0); g.add(b);
+  }
+  // socle aux couleurs du pays
+  const socle = new THREE.Mesh(new THREE.CylinderGeometry(Math.max(largeur, L) * 0.78, Math.max(largeur, L) * 0.82, 0.8, 40),
+    new THREE.MeshStandardMaterial({ color: couleurPays, roughness: 0.6 }));
+  socle.position.y = -0.4; g.add(socle);
+  // zone de survol invisible, plus large que la serre
+  const zone = new THREE.Mesh(new THREE.CylinderGeometry(Math.max(largeur, L) * 0.85, Math.max(largeur, L) * 0.85, hM + hF + 2, 16),
+    new THREE.MeshBasicMaterial({ visible: false }));
+  zone.position.y = (hM + hF) / 2; zone.userData.zone = true; g.add(zone);
+  return g;
+}
+
+// ---------- sites ----------
+const VILLES = [["Chambéry", 45.566, 5.921], ["Grenoble", 45.188, 5.724], ["Annecy", 45.899, 6.129], ["Genève", 46.204, 6.143],
+  ["Gap", 44.559, 6.079], ["Nice", 43.703, 7.266], ["Torino", 45.070, 7.687], ["Aosta", 45.737, 7.315],
+  ["Cuneo", 44.384, 7.543], ["Genova", 44.407, 8.934], ["Savona", 44.309, 8.477], ["Imperia", 43.889, 8.030]];
+const serres = [];  // {sid, groupe, fiche, cible}
+const TAILLE = 2.4;  // échelle des mini-serres (une nef ≈ 7 km sur la carte : symbolique)
+async function placerSites() {
+  const sites = await (await fetch("/api/sites")).json();
+  const occupe = new Set(Object.values(sites).map(s => s.lieu?.ville));
+  for (const [v, lat, lon] of VILLES) if (!occupe.has(v)) etiquette(v, "ville", lon, lat, 0.5);
+  etiquette("FRANCE", "pays", 5.55, 44.55, 0); etiquette("ITALIA", "pays", 8.6, 45.0, 0);
+  etiquette("SUISSE · SVIZZERA", "pays", 7.6, 46.45, 0);
+  const css = getComputedStyle(document.documentElement);
+  for (const [sid, s] of Object.entries(sites)) {
+    const l = s.lieu; if (!l) continue;
+    const coul = l.pays === "IT" ? 0x2f9e5a : 0x3b6fb6;
+    const g = miniSerre(l.nefs || 3, coul);
+    // posée au-dessus du point le plus haut sous son socle (vallées encaissées)
+    let hmax = 0; const R = 7 * TAILLE;
+    for (let dx = -R; dx <= R; dx += R / 4) for (let dz = -R; dz <= R; dz += R / 4)
+      if (dx * dx + dz * dz <= R * R) hmax = Math.max(hmax, hauteur(l.lon + dx / KX, l.lat - dz / KY));
+    g.position.set(px(l.lon), hmax + 0.4 * TAILLE, pz(l.lat));
+    g.rotation.y = l.pays === "IT" ? -0.5 : 0.35;
+    g.scale.setScalar(TAILLE); g.userData.sid = sid; g.traverse(o => o.userData.sid = sid);
+    scene.add(g);
+    const d = document.createElement("div"); d.className = "fiche";
+    d.innerHTML = `<b><span class="drapeau" style="background:${l.pays === "IT" ? "#2f9e5a" : "#3b6fb6"}">${l.pays}</span>${s.nom}</b>
+      <div class="l">${l.ville}${l.a_confirmer ? ' <span class="conf">· localisation à confirmer</span>' : ""}</div>
+      <div class="l">${l.description || ""}</div><div class="v">${s.actif ? "Mesures en cours de chargement…" : "Pas encore de capteurs connectés"}</div>`;
+    const o = new CSS2DObject(d); o.position.set(0, 6, 0); g.add(o);
+    serres.push({ sid, g, d, cible: TAILLE, actif: s.actif });
+    if (s.actif) resume(sid, d.querySelector(".v"));
+  }
+}
+async function resume(sid, el) {
+  try {
+    const j = await (await fetch(`/api/latest?site=${sid}`)).json();
+    const rs = Object.values(j.remotes || {});
+    const frais = rs.filter(r => r.date && Date.now() - new Date(r.date) < 30 * 60000);
+    const moy = k => { const v = frais.filter(r => r.location !== "outside").map(r => r.values?.[k]).filter(x => x != null);
+      return v.length ? v.reduce((a, b) => a + b) / v.length : null; };
+    const t = moy("temp"), hr = moy("humid");
+    el.textContent = `${frais.length}/${rs.length} capteurs actifs` + (t != null ? ` · T air ${t.toFixed(1)} °C` : "") + (hr != null ? ` · HR ${hr.toFixed(0)} %` : "");
+  } catch { el.textContent = "Mesures indisponibles"; }
+}
+
+// ---------- survol et clic ----------
+const ray = new THREE.Raycaster(), souris = new THREE.Vector2(-9, -9);
+let survol = null, bas = null;
+renderer.domElement.addEventListener("pointermove", e => { souris.set(e.clientX / innerWidth * 2 - 1, -e.clientY / innerHeight * 2 + 1); });
+renderer.domElement.addEventListener("pointerleave", () => souris.set(-9, -9));
+renderer.domElement.addEventListener("pointerdown", e => { bas = [e.clientX, e.clientY]; });
+renderer.domElement.addEventListener("pointerup", e => {
+  if (bas && Math.hypot(e.clientX - bas[0], e.clientY - bas[1]) < 5 && survol
+      && serres.find(s => s.sid === survol)?.actif) location.href = `/serre#${survol}`;
+});
+function majSurvol() {
+  ray.setFromCamera(souris, camera);
+  const hit = ray.intersectObjects(serres.map(s => s.g), true)[0];
+  survol = hit ? hit.object.userData.sid : null;
+  renderer.domElement.style.cursor = survol ? (serres.find(s => s.sid === survol)?.actif ? "pointer" : "help") : "";
+  for (const s of serres) {
+    s.cible = s.sid === survol ? TAILLE * 1.7 : TAILLE;
+    const k = s.g.scale.x + (s.cible - s.g.scale.x) * 0.18; s.g.scale.setScalar(k);
+    s.d.classList.toggle("survol", s.sid === survol);
+  }
+}
+
+(function boucle() { requestAnimationFrame(boucle); controls.update(); majSurvol(); renderer.render(scene, camera); css.render(scene, camera); })();
+
+(async () => {
+  try {
+    await chargerRelief();
+    terrain(await texture());
+    document.getElementById("chargement").remove();
+  } catch (e) {
+    console.error("relief", e);
+    document.getElementById("chargement").textContent = `Relief indisponible (${e.message || e}) : carte plate.`;
+    const plan = new THREE.Mesh(new THREE.PlaneGeometry(W, H).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0xcfd6c4 }));
+    scene.add(plan);
+  }
+  await placerSites();
+})();
+</script>
+</body>
+</html>

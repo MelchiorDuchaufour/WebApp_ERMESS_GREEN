@@ -1,0 +1,12 @@
+# secrets : ne jamais publier
+.cles_sigrow
+*.env
+env.sh
+# documents internes du projet (contacts des partenaires)
+*.pptx
+thunderbird.tmp
+# caches et fichiers générés
+__pycache__/
+*.pyc
+**/donnees/cache_pvgis/
+*.blend1

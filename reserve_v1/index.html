@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Serre Bocage 3D</title>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<style>
+:root{
+  --bg:#f4f5f2; --panel:#ffffff; --ink:#1d2321; --muted:#68716d; --line:#dfe3df;
+  --accent:#2f7d4f; --accent-ink:#ffffff; --warn:#b5651d; --off:#9aa19d;
+  --scene:#dfe7ec;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#151918; --panel:#1d2220; --ink:#e7ebe8; --muted:#98a29d; --line:#2e3532;
+    --accent:#5fbf86; --accent-ink:#0f1411; --warn:#e3a05f; --off:#6b736f; --scene:#1f2a30;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#151918; --panel:#1d2220; --ink:#e7ebe8; --muted:#98a29d; --line:#2e3532;
+  --accent:#5fbf86; --accent-ink:#0f1411; --warn:#e3a05f; --off:#6b736f; --scene:#1f2a30;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);
+  font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+#app{display:grid;grid-template-columns:1fr 360px;height:100vh}
+#vue{position:relative;min-height:320px;background:var(--scene);overflow:hidden}
+#vue canvas{display:block}
+#barre{position:absolute;top:12px;left:12px;display:flex;flex-wrap:wrap;gap:6px;z-index:5}
+#barre button,#barre select{font:inherit;padding:6px 10px;border-radius:6px;border:1px solid var(--line);
+  background:var(--panel);color:var(--ink);cursor:pointer}
+#barre button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+#legende{position:absolute;left:12px;bottom:12px;z-index:5;background:var(--panel);border:1px solid var(--line);
+  border-radius:8px;padding:8px 10px;min-width:220px}
+#legende .rampe{height:10px;border-radius:3px;margin:6px 0 2px}
+#legende .bornes{display:flex;justify-content:space-between;font-variant-numeric:tabular-nums;color:var(--muted);font-size:12px}
+#bandeau{position:absolute;top:12px;right:12px;z-index:5;background:var(--warn);color:#fff;border-radius:6px;
+  padding:6px 10px;font-size:13px;display:none;max-width:60%}
+aside{background:var(--panel);border-left:1px solid var(--line);overflow-y:auto;padding:16px}
+h1{font-size:16px;margin:0 0 2px}
+.sous{color:var(--muted);font-size:12px;margin-bottom:14px}
+h2{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:18px 0 6px}
+#liste{list-style:none;margin:0;padding:0}
+#liste li{display:grid;grid-template-columns:14px 1fr auto;gap:8px;align-items:center;padding:7px 6px;
+  border-radius:6px;cursor:pointer}
+#liste li:hover{background:color-mix(in srgb,var(--accent) 10%,transparent)}
+#liste li.sel{background:color-mix(in srgb,var(--accent) 18%,transparent)}
+.pastille{width:12px;height:12px;border-radius:50%;border:1px solid rgba(0,0,0,.25)}
+.pastille.pixel{border-radius:2px}
+.val{font-variant-numeric:tabular-nums;font-weight:600}
+.nom{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.age{display:block;font-size:11px;color:var(--muted)}
+.age.vieux{color:var(--warn)}
+#detail table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+#detail td{padding:3px 0;border-bottom:1px solid var(--line)}
+#detail td:last-child{text-align:right}
+#courbe{height:200px;margin-top:8px}
+#edition{display:none;margin-top:10px;padding:10px;border:1px dashed var(--accent);border-radius:8px}
+#edition label{display:inline-flex;gap:4px;align-items:center;margin-right:6px}
+#edition input[type=number]{width:64px;font:inherit;padding:3px;border:1px solid var(--line);border-radius:4px;
+  background:var(--bg);color:var(--ink)}
+#edition button{font:inherit;padding:5px 10px;border-radius:6px;border:1px solid var(--accent);
+  background:var(--accent);color:var(--accent-ink);cursor:pointer;margin-top:8px}
+#edition button.second{background:transparent;color:var(--accent)}
+.aide{font-size:12px;color:var(--muted)}
+.etiq{font:600 11px/1.2 system-ui,sans-serif;color:#1d2321;background:rgba(255,255,255,.88);
+  border-radius:4px;padding:2px 5px;white-space:nowrap;pointer-events:none;margin-top:-26px}
+.etiq.off{color:#777}
+.etiq.bas{margin-top:26px}
+.avalider{color:var(--warn);font-size:11px}
+.entete{display:flex;gap:12px;align-items:center;margin-bottom:10px}
+.entete img{width:60px;height:60px;object-fit:contain;display:block}
+#site{font:inherit;width:100%;padding:6px 8px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--ink);margin-bottom:4px}
+.partenaires{margin-top:22px;padding-top:12px;border-top:1px solid var(--line)}
+.partenaires #partenaires{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;align-items:center}
+.partenaires img{height:52px;width:100%;object-fit:contain;background:#fff;border-radius:6px;padding:5px 8px;display:block;
+  transition:transform .15s ease,box-shadow .15s ease}
+.partenaires a:hover img{transform:translateY(-2px);box-shadow:0 3px 10px rgba(0,0,0,.18)}
+.entete a img{transition:transform .15s ease} .entete a:hover img{transform:scale(1.06)}
+.forme{display:inline-block;width:12px;text-align:center;font-size:11px;color:var(--muted)}
+@media (max-width:820px){
+  #app{grid-template-columns:1fr;grid-template-rows:60vh auto;height:auto}
+  aside{border-left:0;border-top:1px solid var(--line);padding:16px}
+  #legende{min-width:0;right:12px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="vue">
+    <div id="barre">
+      <select id="variable" aria-label="Variable affichée">
+        <option value="temp">T° air</option>
+        <option value="humid">Humidité relative</option>
+        <option value="vpd">VPD air</option>
+        <option value="par">PAR</option>
+        <option value="pixel_object1_temp">T° feuille (Pixel+)</option>
+        <option value="vpd_plant">VPD plante (Pixel+)</option>
+        <option value="t_dew">Point de rosée</option>
+        <option value="co2">CO₂ (AirPro+)</option>
+        <option value="soil_hum">Humidité du sol (SoilPro+)</option>
+        <option value="soil_temp">T° du sol (SoilPro+)</option>
+        <option value="pore_ec">CE de la solution du sol (SoilPro+)</option>
+        <option value="vbat">Batterie</option>
+      </select>
+      <button id="b-toit" aria-pressed="true">Toit et vitrage</button>
+      <button id="b-dessus" aria-pressed="false">Vue de dessus</button>
+      <button id="b-edit" aria-pressed="false">Placer les capteurs</button>
+    </div>
+    <div id="bandeau"></div>
+    <div id="legende">
+      <div id="leg-titre">T° air (°C)</div>
+      <div class="rampe" id="leg-rampe"></div>
+      <div class="bornes"><span id="leg-min">–</span><span id="leg-max">–</span></div>
+    </div>
+  </div>
+  <aside>
+    <div class="entete">
+      <a id="logo-ermess" href="#" target="_blank" rel="noopener" title="En savoir plus sur le projet ERMESS Green"><img src="/logos/ermess_green_transparent.png" alt="ERMESS Green"></a>
+      <div><h1>Capteurs Sigrow en 3D</h1><div class="aide"><a href="/" style="color:var(--accent)">← Carte des serres</a> ·
+        <a id="plus-ermess" href="#" target="_blank" rel="noopener" style="color:var(--accent)">En savoir plus sur ERMESS Green ↗</a></div></div>
+    </div>
+    <select id="site" aria-label="Site"></select>
+    <div class="sous" id="statut">Chargement…</div>
+    <h2>Capteurs</h2>
+    <ul id="liste"></ul>
+    <div class="aide" id="aide-non-places"></div>
+    <h2>Détail</h2>
+    <div id="detail"><div class="aide">Clique un capteur dans la scène ou la liste.</div></div>
+    <div id="edition">
+      <div class="aide" id="ed-aide">Clique dans la scène pour poser le capteur (x, y), puis ajuste la hauteur.</div>
+      <div style="margin-top:6px">
+        <label>x <input type="number" step="0.1" id="ed-x"></label>
+        <label>y <input type="number" step="0.1" id="ed-y"></label>
+        <label>z <input type="number" step="0.05" id="ed-z"></label>
+      </div>
+      <button id="ed-save">Enregistrer les positions</button>
+      <button id="ed-annul" class="second">Annuler</button>
+      <div class="aide" id="ed-msg"></div>
+    </div>
+    <div class="partenaires">
+      <div class="aide" style="margin-bottom:6px">Partenaires</div>
+      <div id="partenaires"></div>
+    </div>
+  </aside>
+</div>
+
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { CSS2DRenderer, CSS2DObject } from "three/addons/renderers/CSS2DRenderer.js";
+import { ERMESS, remplirPartenaires } from "/logos/liens.js";
+document.getElementById("logo-ermess").href = document.getElementById("plus-ermess").href = ERMESS;
+remplirPartenaires(document.getElementById("partenaires"));
+
+const VARS = {
+  temp:{l:"T° air",u:"°C",d:1}, humid:{l:"Humidité relative",u:"%",d:0}, vpd:{l:"VPD air",u:"kPa",d:2},
+  par:{l:"PAR",u:"µmol/m²/s",d:0}, pixel_object1_temp:{l:"T° feuille",u:"°C",d:1},
+  vpd_plant:{l:"VPD plante",u:"kPa",d:2}, t_dew:{l:"Point de rosée",u:"°C",d:1}, vbat:{l:"Batterie",u:"%",d:0},
+  g_water:{l:"Humidité absolue",u:"g/m³",d:1}, dli:{l:"DLI",u:"mol/m²",d:1}, co2:{l:"CO₂",u:"ppm",d:0},
+  soil_hum:{l:"Humidité du sol",u:"%",d:1}, soil_temp:{l:"T° du sol",u:"°C",d:1}, pore_ec:{l:"CE solution du sol",u:"mS/cm",d:2},
+};
+const VIEUX_MIN = 30;                 // au-delà : capteur considéré hors ligne
+const POLL_MS = 60_000;
+// viridis (8 arrêts)
+const RAMPE = ["#440154","#46327e","#365c8d","#277f8e","#1fa187","#4ac16d","#a0da39","#fde725"];
+const coul = t => {
+  t = Math.min(1, Math.max(0, t)); const s = t * (RAMPE.length - 1), i = Math.min(RAMPE.length - 2, Math.floor(s));
+  return new THREE.Color(RAMPE[i]).lerp(new THREE.Color(RAMPE[i + 1]), s - i);
+};
+document.getElementById("leg-rampe").style.background = `linear-gradient(90deg,${RAMPE.join(",")})`;
+
+// plan (x, y, z-haut) -> three (Y-haut), même conversion que l'export glTF de Blender
+const versScene = p => new THREE.Vector3(p.x, p.z, -p.y);
+const versPlan = v => ({ x: v.x, y: -v.z, z: v.y });
+
+// ---------- scène ----------
+const vue = document.getElementById("vue");
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+vue.appendChild(renderer.domElement);
+const labels = new CSS2DRenderer();
+labels.domElement.style.cssText = "position:absolute;top:0;left:0;pointer-events:none";
+vue.appendChild(labels.domElement);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 500);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true; controls.maxPolarAngle = Math.PI * 0.49;
+scene.add(new THREE.HemisphereLight(0xffffff, 0x8a8f7a, 1.6));
+const soleil = new THREE.DirectionalLight(0xffffff, 1.4); soleil.position.set(30, 50, 20); scene.add(soleil);
+
+const masquables = [];   // toit, vitrage, fermes
+let cliquables = [];     // surfaces sur lesquelles on pose un capteur
+let MODELE = null, centre = new THREE.Vector3(14.75, 1, -17.75), VUE_DEF = new THREE.Vector3(48, 30, 14);
+const loader = new GLTFLoader();
+function chargerDecor(st) {
+  if (MODELE) { scene.remove(MODELE); MODELE = null; }
+  masquables.length = 0; cliquables = [];
+  if (st.modele) {
+    centre.set(14.75, 1, -17.75); VUE_DEF.set(48, 30, 14);
+    loader.load("/modele/" + st.modele, g => {
+      g.scene.traverse(o => {
+        if (!o.isMesh) return;
+        const n = o.name || "";
+        if (/verre/i.test(n) || /verre/i.test(o.material?.name || "")) {
+          o.material = new THREE.MeshStandardMaterial({ color: 0xcfe6f2, transparent: true, opacity: 0.12,
+            depthWrite: false, side: THREE.DoubleSide });
+          masquables.push(o);
+        } else if (/aretes_enveloppe|fermes|ouvrants/i.test(n)) { masquables.push(o); cliquables.push(o); }
+        else cliquables.push(o);
+      });
+      MODELE = g.scene; scene.add(MODELE);
+    }, undefined, () => bandeau(`Maquette ${st.modele} introuvable : lancer export_glb.py dans Blender.`));
+  } else {
+    // pas de maquette : emprise au sol + grille de 1 m
+    const [L, P] = st.emprise || [20, 20];
+    const g = new THREE.Group();
+    const sol = new THREE.Mesh(new THREE.PlaneGeometry(L, P),
+      new THREE.MeshStandardMaterial({ color: 0xc9cfc4, roughness: 1 }));
+    sol.rotation.x = -Math.PI / 2; sol.position.set(L / 2, 0, -P / 2); g.add(sol); cliquables.push(sol);
+    const grille = new THREE.GridHelper(Math.max(L, P), Math.max(L, P), 0x7d857a, 0xa9b0a5);
+    grille.position.set(Math.max(L, P) / 2, 0.005, -Math.max(L, P) / 2); g.add(grille);
+    MODELE = g; scene.add(g);
+    centre.set(L / 2, 0.5, -P / 2); VUE_DEF.set(L / 2 + L * 0.9, Math.max(L, P) * 0.8, -P / 2 + P * 0.9);
+  }
+  camera.position.copy(VUE_DEF); controls.target.copy(centre);
+  document.getElementById("b-toit").style.display = st.modele ? "" : "none";
+}
+
+function redim() {
+  const w = vue.clientWidth, h = vue.clientHeight;
+  renderer.setSize(w, h); labels.setSize(w, h);
+  camera.aspect = w / h; camera.updateProjectionMatrix();
+}
+addEventListener("resize", redim); redim();
+(function boucle() { requestAnimationFrame(boucle); controls.update(); renderer.render(scene, camera); labels.render(scene, camera); })();
+
+// ---------- état ----------
+let POS = { capteurs: {} }, LAT = { remotes: {} }, VAR = "temp", SEL = null, EDIT = false, AVANT_EDIT = null;
+let SITES = {}, SITE = null;
+const api = (chemin, extra = "") => `${chemin}?site=${encodeURIComponent(SITE)}${extra}`;
+const marqueurs = {};   // id -> {mesh, etiq, tige}
+try { VAR = localStorage.getItem("bocage3d.var") || VAR; } catch {}
+document.getElementById("variable").value = VAR;
+
+const GEO = {
+  air: new THREE.SphereGeometry(0.42, 24, 16),
+  airpro: new THREE.OctahedronGeometry(0.55),
+  pixel: new THREE.BoxGeometry(0.65, 0.65, 0.65),
+  soilpro: new THREE.CylinderGeometry(0.4, 0.4, 0.25, 24),
+};
+const TYPES = { air: ["Air+", "●"], airpro: ["AirPro+", "◆"], pixel: ["Pixel+", "■"], soilpro: ["SoilPro+", "▬"] };
+
+function ageMin(rid) {
+  const d = LAT.remotes[rid]?.date; return d ? (Date.now() - new Date(d).getTime()) / 60000 : Infinity;
+}
+function fmtAge(m) {
+  if (!isFinite(m)) return "jamais"; if (m < 1) return "à l'instant"; if (m < 60) return `il y a ${Math.round(m)} min`;
+  if (m < 2880) return `il y a ${Math.round(m / 60)} h`; return `il y a ${Math.round(m / 1440)} j`;
+}
+const typeDe = rid => { const t = (LAT.remotes[rid]?.type || "").toLowerCase(); return GEO[t] ? t : "air"; };
+const unite = (k = VAR) => Object.values(LAT.remotes).map(r => r.units?.[k]).find(Boolean)?.replace("g/m3", "g/m³") || VARS[k]?.u || "";
+const valeur = rid => (ageMin(rid) > VIEUX_MIN ? null : LAT.remotes[rid]?.values?.[VAR] ?? null);
+const fmt = (v, k = VAR) => v == null ? "—" : v.toFixed(VARS[k]?.d ?? 1);
+const nomCourt = rid => (POS.capteurs[rid]?.label || LAT.remotes[rid]?.name || rid);
+
+function bornes() {
+  const vs = Object.keys(POS.capteurs).map(valeur).filter(v => v != null);
+  if (!vs.length) return [0, 1];
+  let lo = Math.min(...vs), hi = Math.max(...vs);
+  const pad = Math.max((hi - lo) * 0.05, VAR === "par" ? 5 : 0.2); return [lo - pad, hi + pad];
+}
+
+function construireMarqueur(rid) {
+  const mesh = new THREE.Mesh(GEO[typeDe(rid)], new THREE.MeshStandardMaterial({ roughness: 0.4 }));
+  mesh.userData.rid = rid;
+  const div = document.createElement("div"); div.className = "etiq";
+  const etiq = new CSS2DObject(div); etiq.position.set(0, 0.45, 0); mesh.add(etiq);
+  const tige = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color: 0x777777 }));
+  scene.add(mesh, tige);
+  return (marqueurs[rid] = { mesh, etiq, tige, div });
+}
+
+function majScene() {
+  const [lo, hi] = bornes();
+  for (const rid of Object.keys(marqueurs)) if (!POS.capteurs[rid]) {
+    scene.remove(marqueurs[rid].mesh, marqueurs[rid].tige); marqueurs[rid].div.remove(); delete marqueurs[rid];
+  }
+  for (const [rid, p] of Object.entries(POS.capteurs)) {
+    const m = marqueurs[rid] || construireMarqueur(rid);
+    const v = valeur(rid), pos = versScene(p);
+    m.mesh.position.copy(pos);
+    m.tige.geometry.setFromPoints([pos, new THREE.Vector3(pos.x, 0, pos.z)]);
+    const c = v == null ? new THREE.Color(0x9aa19d) : coul((v - lo) / (hi - lo));
+    m.mesh.material.color.copy(c);
+    m.mesh.material.emissive.copy(rid === SEL ? new THREE.Color(0x333333) : new THREE.Color(0));
+    m.mesh.scale.setScalar(rid === SEL ? 1.35 : 1);
+    const dessous = Object.entries(POS.capteurs).some(([r2, q]) => r2 !== rid && q.z > p.z && Math.hypot(q.x - p.x, q.y - p.y) < 1.5);
+    m.div.className = "etiq" + (v == null ? " off" : "") + (dessous ? " bas" : "");
+    m.div.textContent = `${nomCourt(rid)} · ${v == null ? (ageMin(rid) > VIEUX_MIN ? "hors ligne" : "—") : fmt(v) + " " + unite()}`;
+  }
+  const V = VARS[VAR];
+  document.getElementById("leg-titre").textContent = `${V.l} (${unite()})`;
+  document.getElementById("leg-min").textContent = fmt(lo);
+  document.getElementById("leg-max").textContent = fmt(hi);
+  majListe(lo, hi);
+}
+
+function majListe(lo, hi) {
+  const ul = document.getElementById("liste"); ul.innerHTML = "";
+  const ids = Object.keys(POS.capteurs).sort((a, b) => nomCourt(a).localeCompare(nomCourt(b)));
+  for (const rid of ids) {
+    const v = valeur(rid), a = ageMin(rid), li = document.createElement("li");
+    li.className = rid === SEL ? "sel" : "";
+    const c = v == null ? "var(--off)" : "#" + coul((v - lo) / (hi - lo)).getHexString();
+    li.innerHTML = `<span class="pastille ${typeDe(rid) === "pixel" ? "pixel" : ""}" style="background:${c}"></span>
+      <span class="nom">${nomCourt(rid)}${POS.capteurs[rid].a_valider ? ' <span class="avalider">· position à valider</span>' : ""}
+      <span class="age ${a > VIEUX_MIN ? "vieux" : ""}">${TYPES[typeDe(rid)][0]} ${rid} · c.${LAT.remotes[rid]?.central ?? "?"} · ${fmtAge(a)}</span></span>
+      <span class="val">${fmt(v)}</span>`;
+    li.onclick = () => choisir(rid);
+    ul.appendChild(li);
+  }
+  const nonPlaces = Object.keys(LAT.remotes).filter(r => !POS.capteurs[r]);
+  const aide = document.getElementById("aide-non-places"); aide.innerHTML = "";
+  if (nonPlaces.length) {
+    aide.textContent = "Non placés : ";
+    nonPlaces.forEach(r => {
+      const b = document.createElement("button"); b.textContent = `${LAT.remotes[r].name}`;
+      b.style.cssText = "font:inherit;font-size:12px;margin:2px;padding:2px 6px;border-radius:4px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer";
+      b.onclick = () => { POS.capteurs[r] = { x: 14.75, y: 17.75, z: 2.4, label: LAT.remotes[r].name, a_valider: true };
+        if (!EDIT) basculerEdition(true); choisir(r); };
+      aide.appendChild(b);
+    });
+  }
+}
+
+async function choisir(rid) {
+  SEL = rid; majScene();
+  const r = LAT.remotes[rid] || {}, vals = r.values || {}, p = POS.capteurs[rid];
+  const lignes = Object.keys(VARS).filter(k => vals[k] != null)
+    .map(k => `<tr><td>${VARS[k].l}</td><td>${fmt(vals[k], k)} ${(r.units?.[k] || VARS[k].u).replace("g/m3", "g/m³")}</td></tr>`).join("");
+  document.getElementById("detail").innerHTML = `
+    <div><b>${r.name || rid}</b></div>
+    <div class="aide">Mesure ${fmtAge(ageMin(rid))}${r.date ? " (" + r.date.slice(0, 16).replace("T", " ") + ")" : ""}
+      · x ${p.x.toFixed(1)} y ${p.y.toFixed(1)} z ${p.z.toFixed(2)} m</div>
+    <table>${lignes || '<tr><td class="aide">Aucune valeur</td><td></td></tr>'}</table>
+    <div id="courbe"></div>`;
+  majEdition();
+  try {
+    const j = await (await fetch(api("/api/series", `&remotes=${rid}&var=${VAR}&hours=48`))).json();
+    const s = j.series?.[rid]; if (!s || !s.t.length || SEL !== rid) return;
+    const css = getComputedStyle(document.documentElement);
+    Plotly.newPlot("courbe", [{ x: s.t, y: s.y, mode: "lines", line: { color: css.getPropertyValue("--accent"), width: 1.8 } }],
+      { margin: { l: 38, r: 8, t: 22, b: 30 }, title: { text: `${VARS[VAR].l} (${unite()}) · 48 h`, font: { size: 12 } },
+        paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
+        font: { color: css.getPropertyValue("--ink"), size: 11 },
+        xaxis: { gridcolor: css.getPropertyValue("--line") }, yaxis: { gridcolor: css.getPropertyValue("--line"), ticksuffix: " " } },
+      { displayModeBar: false, responsive: true });
+  } catch {}
+}
+
+// ---------- interaction scène ----------
+const ray = new THREE.Raycaster(), souris = new THREE.Vector2();
+let bas = null;
+renderer.domElement.addEventListener("pointerdown", e => { bas = [e.clientX, e.clientY]; });
+renderer.domElement.addEventListener("pointerup", e => {
+  if (!bas || Math.hypot(e.clientX - bas[0], e.clientY - bas[1]) > 5) return;   // c'était une rotation
+  const r = renderer.domElement.getBoundingClientRect();
+  souris.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+  ray.setFromCamera(souris, camera);
+  const hitC = ray.intersectObjects(Object.values(marqueurs).map(m => m.mesh))[0];
+  if (hitC && !(EDIT && SEL)) return choisir(hitC.object.userData.rid);
+  if (EDIT && SEL) {
+    const cibles = cliquables.filter(o => o.visible);
+    const hit = ray.intersectObjects(cibles, false)[0];
+    let pt = hit?.point;
+    if (!pt) { pt = new THREE.Vector3(); if (!ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), pt)) return; }
+    const p = POS.capteurs[SEL], q = versPlan(pt);
+    p.x = +q.x.toFixed(2); p.y = +q.y.toFixed(2); p.a_valider = false;
+    majScene(); majEdition();
+  } else if (hitC) choisir(hitC.object.userData.rid);
+});
+
+// ---------- édition ----------
+function majEdition() {
+  const box = document.getElementById("edition"); box.style.display = EDIT ? "block" : "none";
+  if (!EDIT) return;
+  const p = SEL && POS.capteurs[SEL];
+  document.getElementById("ed-aide").textContent = p
+    ? `${nomCourt(SEL)} : clique dans la scène pour le poser (x, y), puis ajuste la hauteur z.`
+    : "Choisis un capteur dans la liste.";
+  for (const k of ["x", "y", "z"]) {
+    const inp = document.getElementById("ed-" + k); inp.disabled = !p; inp.value = p ? p[k] : "";
+    inp.oninput = () => { if (!p || inp.value === "") return; p[k] = +inp.value; p.a_valider = false; majScene(); };
+  }
+}
+function basculerEdition(on) {
+  EDIT = on; document.getElementById("b-edit").setAttribute("aria-pressed", on);
+  if (on) AVANT_EDIT = JSON.parse(JSON.stringify(POS.capteurs));
+  document.getElementById("ed-msg").textContent = ""; majEdition();
+}
+document.getElementById("b-edit").onclick = () => basculerEdition(!EDIT);
+document.getElementById("ed-annul").onclick = () => { if (AVANT_EDIT) POS.capteurs = AVANT_EDIT; basculerEdition(false); majScene(); };
+document.getElementById("ed-save").onclick = async () => {
+  const msg = document.getElementById("ed-msg"); msg.textContent = "Enregistrement…";
+  try {
+    const r = await fetch(api("/api/capteurs"), { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ capteurs: POS.capteurs }) });
+    const j = await r.json(); if (!r.ok) throw new Error(j.error);
+    POS = j; AVANT_EDIT = JSON.parse(JSON.stringify(POS.capteurs));
+    msg.textContent = `Enregistré (${j.maj}) dans ${SITES[SITE].positions}`; majScene();
+  } catch (e) { msg.textContent = "Échec : " + e.message; }
+};
+
+// ---------- boutons de vue ----------
+document.getElementById("variable").onchange = e => {
+  VAR = e.target.value; try { localStorage.setItem("bocage3d.var", VAR); } catch {}
+  majScene(); if (SEL) choisir(SEL);
+};
+document.getElementById("b-toit").onclick = e => {
+  const on = e.target.getAttribute("aria-pressed") !== "true"; e.target.setAttribute("aria-pressed", on);
+  masquables.forEach(o => o.visible = on);
+};
+document.getElementById("b-dessus").onclick = e => {
+  const on = e.target.getAttribute("aria-pressed") !== "true"; e.target.setAttribute("aria-pressed", on);
+  if (on) { camera.position.set(centre.x, Math.max(30, VUE_DEF.y * 1.6), centre.z + 0.01); masquables.forEach(o => o.visible = false);
+    document.getElementById("b-toit").setAttribute("aria-pressed", false); }
+  else camera.position.copy(VUE_DEF);
+  controls.target.copy(centre);
+};
+function bandeau(t) { const b = document.getElementById("bandeau"); b.textContent = t; b.style.display = t ? "block" : "none"; }
+
+// ---------- données ----------
+async function rafraichir() {
+  try {
+    const [p, l] = await Promise.all([
+      EDIT ? Promise.resolve(null) : fetch(api("/api/capteurs")).then(r => r.json()),
+      fetch(api("/api/latest")).then(r => r.json()),
+    ]);
+    if (l.error) throw new Error(l.error);
+    if (l.site !== SITE) return;          // réponse d'un site quitté entre-temps
+    if (p) POS = p; LAT = l;
+    majOptions();
+    const n = Object.keys(POS.capteurs).length, off = Object.keys(POS.capteurs).filter(r => ageMin(r) > VIEUX_MIN).length;
+    document.getElementById("statut").textContent =
+      `Central ${(l.centrals || []).join(" + ")} · ${Object.keys(l.remotes).length} capteurs · ${n} placés${off ? ` · ${off} hors ligne` : ""} · mis à jour ${l.updated.slice(11, 16)}`;
+    bandeau(l.erreur ? l.erreur
+      : Object.values(POS.capteurs).some(c => c.a_valider) ? "Positions provisoires : à valider avec « Placer les capteurs »" : "");
+    majScene();
+  } catch (e) { document.getElementById("statut").textContent = "Erreur API : " + e.message; }
+}
+function majOptions() {
+  // n'affiche que les variables mesurées sur ce site
+  const dispo = new Set(Object.values(LAT.remotes).flatMap(r => Object.keys(r.values || {}).filter(k => r.values[k] != null)));
+  const sel = document.getElementById("variable");
+  for (const o of sel.options) o.hidden = !dispo.has(o.value);
+  if (!dispo.has(VAR) && dispo.size) { VAR = [...sel.options].find(o => !o.hidden)?.value || "temp"; sel.value = VAR; }
+}
+function changerSite(sid) {
+  SITE = sid; SEL = null; if (EDIT) basculerEdition(false);
+  try { localStorage.setItem("bocage3d.site", sid); } catch {}
+  history.replaceState(null, "", "#" + sid);
+  for (const rid of Object.keys(marqueurs)) { scene.remove(marqueurs[rid].mesh, marqueurs[rid].tige); marqueurs[rid].div.remove(); delete marqueurs[rid]; }
+  POS = { capteurs: {} }; LAT = { remotes: {} };
+  document.getElementById("detail").innerHTML = '<div class="aide">Clique un capteur dans la scène ou la liste.</div>';
+  document.getElementById("liste").innerHTML = ""; document.getElementById("statut").textContent = "Chargement…";
+  chargerDecor(SITES[sid]); rafraichir();
+}
+(async () => {
+  SITES = await (await fetch("/api/sites")).json();
+  const sel = document.getElementById("site");
+  SITES = Object.fromEntries(Object.entries(SITES).filter(([, st]) => st.actif));
+  for (const [sid, st] of Object.entries(SITES)) sel.add(new Option(st.nom, sid));
+  let s0 = location.hash.slice(1); try { s0 = s0 || localStorage.getItem("bocage3d.site"); } catch {}
+  if (!SITES[s0]) s0 = Object.keys(SITES)[0];
+  sel.value = s0; sel.onchange = e => changerSite(e.target.value);
+  changerSite(s0);
+  setInterval(rafraichir, POLL_MS);
+})();
+</script>
+</body>
+</html>

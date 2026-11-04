@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Contrôle des actionneurs</title>
+<link rel="stylesheet" href="/onglets/commun.css">
+<style>
+.curseur{display:grid;grid-template-columns:130px 1fr 54px;gap:10px;align-items:center;margin:10px 0;font-size:13px}
+.curseur output{font-variant-numeric:tabular-nums;text-align:right;font-weight:600}
+svg text{font:11px system-ui,sans-serif;fill:var(--muted)}
+</style>
+</head>
+<body>
+<main>
+  <header class="onglet"><h1>Contrôle : écrans, ouvrants, chauffage</h1><span class="badge">Prévisualisation · version de contrôle</span></header>
+  <p class="chapo">État des actionneurs de la serre Rigerie. Aucun signal du régulateur climatique n'est encore relié :
+    l'état est saisi ici, enregistré par le serveur (<code>actionneurs_bocage.json</code>) et affiché en direct dans
+    Blender (<code>blender/blender_live.py</code>). La version de contrôle reliera ces valeurs à l'automate de la serre.</p>
+  <div class="grille">
+    <div class="carte">
+      <h2>Consignes</h2>
+      <div class="curseur"><span>Écran nef 1</span><input type="range" id="e0" min="0" max="100" step="5"><output id="o-e0"></output></div>
+      <div class="curseur"><span>Écran nef 2</span><input type="range" id="e1" min="0" max="100" step="5"><output id="o-e1"></output></div>
+      <div class="curseur"><span>Écran nef 3</span><input type="range" id="e2" min="0" max="100" step="5"><output id="o-e2"></output></div>
+      <div class="curseur"><span>Ouvrants de faîtage</span><input type="range" id="ouv" min="0" max="45" step="1"><output id="o-ouv"></output></div>
+      <div class="curseur"><span>Chauffage</span><input type="range" id="ch" min="0" max="100" step="5"><output id="o-ch"></output></div>
+      <button id="envoyer">Enregistrer l'état</button>
+      <button id="nuit" class="second">Préréglage nuit</button>
+      <button id="jour" class="second">Préréglage jour chaud</button>
+      <div class="etat" id="etat"></div>
+    </div>
+    <div class="carte">
+      <h2>Coupe transversale (3 nefs)</h2>
+      <svg id="coupe" viewBox="0 0 720 260" width="100%" role="img" aria-label="Coupe de la serre avec écrans et ouvrants"></svg>
+      <div class="note" id="maj"></div>
+    </div>
+  </div>
+</main>
+<script type="module">
+const $ = id => document.getElementById(id);
+const SITE = new URLSearchParams(location.search).get("site") || "bocage";
+const etatCourant = () => ({ ecrans: [0, 1, 2].map(i => +$("e" + i).value / 100), ouvrants_deg: +$("ouv").value,
+                             chauffage: +$("ch").value / 100, source: "manuel (onglet Contrôle)" });
+function afficher(a) {
+  [0, 1, 2].forEach(i => $("e" + i).value = Math.round((a.ecrans[i] ?? 0) * 100));
+  $("ouv").value = a.ouvrants_deg; $("ch").value = Math.round(a.chauffage * 100);
+  sorties(); dessiner();
+  $("maj").textContent = a.maj ? `Dernier enregistrement : ${a.maj} (${a.source})` : "Jamais enregistré";
+}
+function sorties() {
+  [0, 1, 2].forEach(i => $("o-e" + i).value = $("e" + i).value + " %");
+  $("o-ouv").value = $("ouv").value + "°"; $("o-ch").value = $("ch").value + " %";
+}
+function dessiner() {
+  const css = getComputedStyle(document.documentElement), c = k => css.getPropertyValue(k).trim();
+  const W = 720, x0 = 40, nef = (W - 2 * x0) / 3, sol = 230, ch = 120, fa = 70, a = etatCourant();
+  let s = `<line x1="${x0 - 20}" y1="${sol}" x2="${W - x0 + 20}" y2="${sol}" stroke="${c("--line")}" stroke-width="2"/>`;
+  // tubes de chauffage
+  const chaud = a.chauffage;
+  s += `<line x1="${x0}" y1="${sol - 18}" x2="${W - x0}" y2="${sol - 18}" stroke="rgb(${Math.round(40 + 180 * chaud)},${Math.round(90 - 50 * chaud)},60)" stroke-width="${3 + 3 * chaud}" stroke-linecap="round"/>`;
+  s += `<text x="${x0}" y="${sol - 26}">chauffage ${Math.round(chaud * 100)} %</text>`;
+  for (let i = 0; i < 3; i++) {
+    const xa = x0 + i * nef, xb = xa + nef, xm = (xa + xb) / 2;
+    s += `<polyline points="${xa},${sol} ${xa},${ch} ${xm},${fa} ${xb},${ch} ${xb},${sol}" fill="none" stroke="${c("--muted")}" stroke-width="1.5"/>`;
+    // ouvrant : pan côté droit du faîtage, charnière au faîtage
+    const ang = a.ouvrants_deg * Math.PI / 180, lg = 36, pente = Math.atan2(ch - fa, nef / 2);
+    const ex = xm + lg * Math.cos(pente - ang), ey = fa + lg * Math.sin(pente - ang);
+    s += `<line x1="${xm}" y1="${fa}" x2="${ex}" y2="${ey}" stroke="${c("--accent")}" stroke-width="4" stroke-linecap="round"/>`;
+    // écran : tiré depuis le chéneau gauche
+    const f = a.ecrans[i], larg = Math.max(4, f * nef);
+    s += `<line x1="${xa}" y1="${ch + 6}" x2="${xa + larg}" y2="${ch + 6}" stroke="${c("--warn")}" stroke-width="5" stroke-linecap="round"/>`;
+    s += `<text x="${xm}" y="${sol + 18}" text-anchor="middle">nef ${i + 1} · écran ${Math.round(f * 100)} %</text>`;
+  }
+  s += `<text x="${W - x0}" y="${fa - 10}" text-anchor="end">ouvrants ${a.ouvrants_deg}°</text>`;
+  $("coupe").innerHTML = s;
+}
+document.querySelectorAll("input[type=range]").forEach(r => r.oninput = () => { sorties(); dessiner(); });
+async function envoyer(a = etatCourant()) {
+  const etat = $("etat"); etat.className = "etat"; etat.textContent = "Enregistrement…";
+  try {
+    const r = await fetch(`/api/actionneurs?site=${SITE}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(a) });
+    const j = await r.json(); if (!r.ok) throw new Error(j.error);
+    afficher(j); etat.textContent = "Enregistré. Blender le reprend au prochain rafraîchissement.";
+  } catch (e) { etat.className = "etat erreur"; etat.textContent = "Échec : " + e.message; }
+}
+$("envoyer").onclick = () => envoyer();
+$("nuit").onclick = () => envoyer({ ecrans: [1, 1, 1], ouvrants_deg: 0, chauffage: 0.7, source: "préréglage nuit" });
+$("jour").onclick = () => envoyer({ ecrans: [0.6, 0.6, 0.6], ouvrants_deg: 35, chauffage: 0, source: "préréglage jour chaud" });
+afficher(await (await fetch(`/api/actionneurs?site=${SITE}`)).json());
+</script>
+</body>
+</html>

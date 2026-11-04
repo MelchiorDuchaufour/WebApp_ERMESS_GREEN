@@ -1,0 +1,40 @@
+{
+  "bocage": {
+    "nom": "Serre Rigerie · Bocage",
+    "sources": [
+      {
+        "central": 28896,
+        "cle": "SIGROW_API_KEY",
+        "filtre": "Bocage"
+      },
+      {
+        "central": 15353,
+        "cle": "SIGROW_API_KEY_15353",
+        "filtre": ""
+      }
+    ],
+    "modele": "serre.glb",
+    "positions": "capteurs_positions.json",
+    "lieu": {
+      "ville": "Chambéry",
+      "pays": "FR",
+      "lat": 45.566,
+      "lon": 5.935,
+      "nefs": 3,
+      "description": "Grande serre multi-chapelles en verre, 1020 m², 41 tablettes"
+    }
+  },
+  "savona": {
+    "nom": "Site pilote de Savona",
+    "sources": [],
+    "positions": "positions_savona.json",
+    "lieu": {
+      "ville": "Savona",
+      "pays": "IT",
+      "lat": 44.309,
+      "lon": 8.477,
+      "nefs": 2,
+      "description": "Calibration du pipeline vision (LAI)"
+    }
+  }
+}

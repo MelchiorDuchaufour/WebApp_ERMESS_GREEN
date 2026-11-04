@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Potentiel photovoltaïque</title>
+<link rel="stylesheet" href="/onglets/commun.css">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+</head>
+<body>
+<main>
+  <header class="onglet"><h1>Potentiel photovoltaïque en toiture</h1><span class="badge">Prévisualisation · version de base</span></header>
+  <p class="chapo">Production de modules intégrés sur les pans de toiture d'une serre aux caractéristiques choisies,
+    et ombrage moyen induit sur la culture. Production calculée par PVGIS (Centre commun de recherche de la Commission
+    européenne) pour le lieu, la pente et l'orientation des pans.</p>
+  <div class="grille">
+    <div>
+      <div class="carte">
+        <h2>Lieu</h2>
+        <label class="champ">Latitude (°)<input id="lat" type="number" step="0.001"></label>
+        <label class="champ">Longitude (°)<input id="lon" type="number" step="0.001"></label>
+        <div class="note" id="lieu-nom"></div>
+      </div>
+      <div class="carte">
+        <h2>Serre</h2>
+        <label class="champ">Longueur des faîtages (m)<input id="L" type="number" step="0.5"></label>
+        <label class="champ">Largeur totale (m)<input id="W" type="number" step="0.5"></label>
+        <label class="champ">Nombre de nefs<input id="n" type="number" min="1" max="20"></label>
+        <label class="champ">Pente de toiture (°)<input id="pente" type="number" min="5" max="60"></label>
+        <label class="champ"><span>Orientation des pans équipés<small>Nord non indiqué sur le plan 2012</small></span>
+          <select id="aspect">
+            <option value="0">Sud</option><option value="-45">Sud-Est</option><option value="45">Sud-Ouest</option>
+            <option value="-90">Est</option><option value="90">Ouest</option><option value="ew">Est + Ouest</option>
+          </select></label>
+      </div>
+      <div class="carte">
+        <h2>Modules</h2>
+        <label class="champ">Technologie
+          <select id="techno">
+            <option value="opaque">Opaque mono-Si (≈ 210 Wc/m², 0 % lumière)</option>
+            <option value="semi" selected>Semi-transparent, cellules espacées (≈ 120 Wc/m², 40 %)</option>
+            <option value="mince">Couche mince teintée (≈ 60 Wc/m², 50 %)</option>
+          </select></label>
+        <label class="champ"><span>Couverture des pans équipés<small id="couv-val"></small></span><input id="couv" type="range" min="0" max="100" step="5" value="50"></label>
+        <label class="champ">Pertes système (%)<input id="pertes" type="number" min="0" max="40" value="14"></label>
+        <button id="calc">Calculer</button>
+        <div class="etat" id="etat"></div>
+      </div>
+    </div>
+    <div>
+      <div class="tuiles">
+        <div class="tuile"><div class="v" id="t-kwc">–</div><div class="l">Puissance installée</div></div>
+        <div class="tuile"><div class="v" id="t-prod">–</div><div class="l">Production annuelle</div></div>
+        <div class="tuile"><div class="v" id="t-spec">–</div><div class="l">Productible spécifique</div></div>
+        <div class="tuile"><div class="v" id="t-ombre">–</div><div class="l">Lumière perdue, moyenne sous toiture</div></div>
+      </div>
+      <div class="carte">
+        <h2>Production mensuelle</h2>
+        <div class="graphe" id="graphe"></div>
+        <details><summary>Voir le tableau</summary><div id="table"></div></details>
+      </div>
+      <div class="carte">
+        <h2>Hypothèses</h2>
+        <div class="note" id="hyp"></div>
+      </div>
+    </div>
+  </div>
+</main>
+<script type="module">
+import { lieuDuSite, geometrie, RIGERIE, pvgis, MOIS, fmt, barres, tableau } from "/onglets/commun.js";
+const TECH = { opaque: { wc: 210, t: 0.0 }, semi: { wc: 120, t: 0.4 }, mince: { wc: 60, t: 0.5 } };
+const $ = id => document.getElementById(id);
+const lieu = await lieuDuSite();
+$("lat").value = lieu.lat; $("lon").value = lieu.lon; $("lieu-nom").textContent = `${lieu.nom} (${lieu.ville})`;
+for (const k of ["L", "W", "n", "pente"]) $(k).value = RIGERIE[k];
+const majCouv = () => $("couv-val").textContent = `${$("couv").value} % de la surface des pans`;
+$("couv").oninput = majCouv; majCouv();
+
+async function calculer() {
+  const etat = $("etat"); etat.className = "etat"; etat.textContent = "Appel à PVGIS…";
+  try {
+    const g = geometrie({ L: +$("L").value, W: +$("W").value, n: +$("n").value, h: 4, pente: +$("pente").value });
+    const tech = TECH[$("techno").value], couv = +$("couv").value / 100, ew = $("aspect").value === "ew";
+    const aspects = ew ? [-90, 90] : [+$("aspect").value];
+    const surfPV = couv * g.panParCote * aspects.length;                   // m²
+    const kwc = surfPV * tech.wc / 1000;
+    const res = await Promise.all(aspects.map(a => pvgis(+$("lat").value, +$("lon").value, +$("pente").value, a, +$("pertes").value)));
+    const mensuel = MOIS.map((_, m) => res.reduce((s, r) => s + r.outputs.monthly.fixed[m].E_m, 0) / aspects.length * kwc);
+    const annuel = mensuel.reduce((a, b) => a + b, 0);
+    const ombre = surfPV / g.toit * (1 - tech.t);                            // fraction de toiture × opacité
+    $("t-kwc").innerHTML = `${fmt(kwc, 1)}<span class="u">kWc</span>`;
+    $("t-prod").innerHTML = `${fmt(annuel / 1000, 1)}<span class="u">MWh/an</span>`;
+    $("t-spec").innerHTML = `${fmt(annuel / kwc || 0)}<span class="u">kWh/kWc</span>`;
+    $("t-ombre").innerHTML = `${fmt(ombre * 100, 0)}<span class="u">%</span>`;
+    barres("graphe", MOIS, mensuel, { unite: "kWh" });
+    tableau($("table"), ["Mois", "Production (kWh)"], MOIS.map((m, i) => [m, fmt(mensuel[i])]).concat([["Année", fmt(annuel)]]));
+    $("hyp").innerHTML = `Surface au sol ${fmt(g.sol)} m², toiture ${fmt(g.toit)} m² (${+$("n").value} nefs de ${fmt(g.w, 2)} m,
+      pans de ${fmt(g.pan, 2)} m). Pans équipés : ${aspects.length === 2 ? "est et ouest" : "un côté de chaque nef"},
+      ${fmt(g.panParCote * aspects.length)} m², dont ${fmt(surfPV)} m² de modules à ${tech.wc} Wc/m².
+      Productible PVGIS ${fmt(annuel / kwc || 0)} kWh/kWc (base de données SARAH, pertes ${$("pertes").value} %).
+      Lumière perdue = part de toiture couverte × opacité des modules, sans effet d'angle ni de structure :
+      une estimation de l'ombrage moyen, pas sa répartition sur les tablettes.`;
+    etat.textContent = "Calcul PVGIS à jour.";
+  } catch (e) { etat.className = "etat erreur"; etat.textContent = "Échec : " + e.message; }
+}
+$("calc").onclick = calculer;
+calculer();
+</script>
+</body>
+</html>
