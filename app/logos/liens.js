@@ -1,13 +1,13 @@
 // Liens des logos (accueil et vue d'un site). Un lien vide = logo non cliquable.
-import { t } from "/onglets/i18n.js";
+import { t } from "../onglets/i18n.js";
 export const ERMESS = "https://www.univ-smb.fr/locie/2025/12/15/ermess-green-project";
 export const PARTENAIRES = [
-  { img: "/logos/interreg.png",    alt: "Interreg Alcotra",              url: "https://www.interreg-alcotra.eu/" },
-  { img: "/logos/usmb.png",        alt: "Université Savoie Mont Blanc",  url: "https://www.univ-smb.fr/" },
-  { img: "/logos/locie.png",       alt: "LOCIE",                         url: "https://www.univ-smb.fr/locie/" },
-  { img: "/logos/unige.png",       alt: "Università di Genova",          url: "https://unige.it/" },
-  { img: "/logos/dime.png",        alt: "DIME, Università di Genova",    url: "https://dime.unige.it/" },
-  { img: "/logos/agrithermic.png", alt: "Agrithermic",                   url: "" },   // adresse à fournir
+  { img: "logos/interreg.png",    alt: "Interreg Alcotra",              url: "https://www.interreg-alcotra.eu/" },
+  { img: "logos/usmb.png",        alt: "Université Savoie Mont Blanc",  url: "https://www.univ-smb.fr/" },
+  { img: "logos/locie.png",       alt: "LOCIE",                         url: "https://www.univ-smb.fr/locie/" },
+  { img: "logos/unige.png",       alt: "Università di Genova",          url: "https://unige.it/" },
+  { img: "logos/dime.png",        alt: "DIME, Università di Genova",    url: "https://dime.unige.it/" },
+  { img: "logos/agrithermic.png", alt: "Agrithermic",                   url: "" },   // adresse à fournir
 ];
 export function remplirPartenaires(conteneur) {
   conteneur.replaceChildren(...PARTENAIRES.map(p => {

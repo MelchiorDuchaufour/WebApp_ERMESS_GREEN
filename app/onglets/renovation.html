@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title data-i18n="ren.titre_page">Gains de rénovation</title>
-<link rel="stylesheet" href="/onglets/commun.css">
+<link rel="stylesheet" href="./commun.css">
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
 <style>
 .scen{display:grid;grid-template-columns:20px 1fr;gap:6px;align-items:start;margin:8px 0;font-size:13px}
@@ -50,9 +50,9 @@
   </div>
 </main>
 <script type="module">
-import { t, appliquer } from "/onglets/i18n.js";
+import { t, appliquer } from "./i18n.js";
 appliquer();
-import { lieuDuSite, geometrie, RIGERIE, PARAM_BASE, besoinChauffage, tmy, fmt, barres, tableau } from "/onglets/commun.js";
+import { lieuDuSite, geometrie, RIGERIE, PARAM_BASE, besoinChauffage, tmy, fmt, barres, tableau } from "./commun.js";
 const $ = id => document.getElementById(id);
 const lieu = await lieuDuSite();
 const g = geometrie(RIGERIE);

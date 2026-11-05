@@ -2,11 +2,11 @@
 // Modèle volontairement simple : ordres de grandeur pour l'outil de calcul ERMESS
 // Green (WP3.4). Le calcul détaillé reste celui de GreenhousesJL.
 
-import { LOCALE, SEPARATEURS, champSite } from "/onglets/i18n.js";
+import { LOCALE, SEPARATEURS, champSite } from "./i18n.js";
 export const SITE_DEFAUT = "bocage";
 
 export async function lieuDuSite(sid = SITE_DEFAUT) {
-  const sites = await (await fetch("/api/sites")).json();
+  const sites = await (await fetch("../api/sites")).json();
   const s = sites[sid] || Object.values(sites)[0];
   return { ...s.lieu, nom: champSite(s, "nom"), description: champSite(s, "description") };
 }
@@ -57,12 +57,12 @@ export const PARAM_BASE = { Utoit: 6.0, Uparois: 6.0, ach: 1.0, tau: 0.80, eta: 
                             ecran: 0, fracIsol: 0, Uisol: 0.5 };
 
 export async function tmy(lat, lon) {
-  const r = await fetch(`/api/tmy?lat=${lat}&lon=${lon}`);
+  const r = await fetch(`../api/tmy?lat=${lat}&lon=${lon}`);
   const j = await r.json(); if (j.error) throw new Error(j.error); return j;
 }
 
 export async function pvgis(lat, lon, angle, aspect, loss = 14) {
-  const r = await fetch(`/api/pv?lat=${lat}&lon=${lon}&peakpower=1&loss=${loss}&angle=${angle}&aspect=${aspect}`);
+  const r = await fetch(`../api/pv?lat=${lat}&lon=${lon}&peakpower=1&loss=${loss}&angle=${angle}&aspect=${aspect}`);
   const j = await r.json(); if (j.error) throw new Error(j.error); return j;
 }
 

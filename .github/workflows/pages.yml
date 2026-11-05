@@ -1,0 +1,49 @@
+# Version publique de la webapp ERMESS Green sur GitHub Pages.
+# Toutes les 15 min (et à chaque push) : récupère les mesures Sigrow et reconstruit le site statique.
+# Clés Sigrow : Settings > Secrets and variables > Actions (SIGROW_API_KEY, SIGROW_API_KEY_15353).
+name: Site public (GitHub Pages)
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  construire:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests
+      - name: Construire le site et récupérer les mesures
+        working-directory: app
+        env:
+          SIGROW_API_KEY: ${{ secrets.SIGROW_API_KEY }}
+          SIGROW_API_KEY_15353: ${{ secrets.SIGROW_API_KEY_15353 }}
+        run: python statique/construire.py ../_site
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+  publier:
+    needs: construire
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploiement.outputs.page_url }}
+    steps:
+      - id: deploiement
+        uses: actions/deploy-pages@v4

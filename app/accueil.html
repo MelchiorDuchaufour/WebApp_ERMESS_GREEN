@@ -81,7 +81,7 @@ html,body{margin:0;height:100%;overflow:hidden;color:var(--ink);
 <body>
 <div id="scene"></div>
 <a id="logo" href="#" target="_blank" rel="noopener" data-i18n-title="commun.ermess_titre" title="En savoir plus sur le projet ERMESS Green">
-  <img src="/logos/ermess_green_transparent.png" alt="ERMESS Green"><span class="plus" data-i18n="commun.ermess_plus">En savoir plus ↗</span></a>
+  <img src="logos/ermess_green_transparent.png" alt="ERMESS Green"><span class="plus" data-i18n="commun.ermess_plus">En savoir plus ↗</span></a>
 <div id="titre"><h1 data-i18n="acc.h1">Serres instrumentées France – Italie</h1><p data-i18n="acc.sous">Capteurs Sigrow en temps réel · Interreg Alcotra ERMESS Green</p></div>
 <div id="chargement" data-i18n="acc.chargement">Chargement du relief…</div>
 <div id="aide" data-i18n="acc.aide">Survole une serre, clique pour l'ouvrir · glisser pour tourner, molette pour zoomer</div>
@@ -93,8 +93,8 @@ html,body{margin:0;height:100%;overflow:hidden;color:var(--ink);
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { CSS2DRenderer, CSS2DObject } from "three/addons/renderers/CSS2DRenderer.js";
-import { ERMESS, remplirPartenaires } from "/logos/liens.js";
-import { t, appliquer, selecteurLangue, champSite, avecLangue } from "/onglets/i18n.js";
+import { ERMESS, remplirPartenaires } from "./logos/liens.js";
+import { t, appliquer, selecteurLangue, champSite, avecLangue } from "./onglets/i18n.js";
 appliquer(); selecteurLangue(document.getElementById("langue"));
 document.getElementById("logo").href = ERMESS;
 remplirPartenaires(document.getElementById("partenaires"));
@@ -274,7 +274,7 @@ const VILLES = [["Chambéry", 45.566, 5.921], ["Grenoble", 45.188, 5.724], ["Ann
 const serres = [];  // {sid, groupe, fiche, cible}
 const TAILLE = 2.4;  // échelle des mini-serres (une nef ≈ 7 km sur la carte : symbolique)
 async function placerSites() {
-  const sites = await (await fetch("/api/sites")).json();
+  const sites = await (await fetch("api/sites")).json();
   const occupe = new Set(Object.values(sites).map(s => s.lieu?.ville));
   for (const [v, lat, lon] of VILLES) if (!occupe.has(v)) etiquette(v, "ville", lon, lat, 0.5);
   etiquette("FRANCE", "pays", 5.55, 44.55, 0); etiquette("ITALIA", "pays", 8.6, 45.0, 0);
@@ -303,7 +303,7 @@ async function placerSites() {
 }
 async function resume(sid, el) {
   try {
-    const j = await (await fetch(`/api/latest?site=${sid}`)).json();
+    const j = await (await fetch(`api/latest?site=${sid}`)).json();
     const rs = Object.values(j.remotes || {});
     const frais = rs.filter(r => r.date && Date.now() - new Date(r.date) < 30 * 60000);
     const moy = k => { const v = frais.filter(r => r.location !== "outside").map(r => r.values?.[k]).filter(x => x != null);
@@ -322,7 +322,7 @@ renderer.domElement.addEventListener("pointerleave", () => souris.set(-9, -9));
 renderer.domElement.addEventListener("pointerdown", e => { bas = [e.clientX, e.clientY]; });
 renderer.domElement.addEventListener("pointerup", e => {
   if (bas && Math.hypot(e.clientX - bas[0], e.clientY - bas[1]) < 5 && survol
-      && serres.find(s => s.sid === survol)?.actif) location.href = avecLangue(`/serre#${survol}`);
+      && serres.find(s => s.sid === survol)?.actif) location.href = avecLangue(`serre.html#${survol}`);
 });
 function majSurvol() {
   ray.setFromCamera(souris, camera);

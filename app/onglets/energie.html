@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title data-i18n="en.titre_page">Besoins énergétiques</title>
-<link rel="stylesheet" href="/onglets/commun.css">
+<link rel="stylesheet" href="./commun.css">
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
 </head>
 <body>
@@ -53,9 +53,9 @@
   </div>
 </main>
 <script type="module">
-import { t, appliquer } from "/onglets/i18n.js";
+import { t, appliquer } from "./i18n.js";
 appliquer();
-import { lieuDuSite, geometrie, RIGERIE, PARAM_BASE, besoinChauffage, tmy, MOIS, fmt, barres, tableau } from "/onglets/commun.js";
+import { lieuDuSite, geometrie, RIGERIE, PARAM_BASE, besoinChauffage, tmy, MOIS, fmt, barres, tableau } from "./commun.js";
 const $ = id => document.getElementById(id);
 const lieu = await lieuDuSite();
 for (const k of ["L", "W", "n", "h", "pente"]) $(k).value = RIGERIE[k];

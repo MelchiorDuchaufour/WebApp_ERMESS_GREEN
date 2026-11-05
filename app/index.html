@@ -116,7 +116,7 @@ h2{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--mute
 </head>
 <body>
 <nav id="rail" role="tablist" aria-label="Onglets" data-i18n-aria="rail.onglets">
-  <a class="accueil" href="/" title="Carte des serres" data-i18n-title="rail.carte"><img src="/logos/ermess_green_transparent.png" alt="ERMESS Green"></a>
+  <a class="accueil" href="./" title="Carte des serres" data-i18n-title="rail.carte"><img src="logos/ermess_green_transparent.png" alt="ERMESS Green"></a>
   <button role="tab" data-onglet="suivi" aria-selected="true" data-i18n-title="rail.suivi_t">
     <svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9H3z"/><circle cx="9" cy="14" r="1.6"/><circle cx="15" cy="12" r="1.6"/></svg><span data-i18n="rail.suivi">Suivi</span></button>
   <button role="tab" data-onglet="pv" hidden data-i18n-title="rail.pv_t">
@@ -159,8 +159,8 @@ h2{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--mute
   </div>
   <aside>
     <div class="entete">
-      <a id="logo-ermess" href="#" target="_blank" rel="noopener" data-i18n-title="commun.ermess_titre"><img src="/logos/ermess_green_transparent.png" alt="ERMESS Green"></a>
-      <div><h1 data-i18n="serre.h1">Capteurs Sigrow en 3D</h1><div class="aide"><a id="retour" href="/" style="color:var(--accent)" data-i18n="serre.retour">← Carte des serres</a> ·
+      <a id="logo-ermess" href="#" target="_blank" rel="noopener" data-i18n-title="commun.ermess_titre"><img src="logos/ermess_green_transparent.png" alt="ERMESS Green"></a>
+      <div><h1 data-i18n="serre.h1">Capteurs Sigrow en 3D</h1><div class="aide"><a id="retour" href="./" style="color:var(--accent)" data-i18n="serre.retour">← Carte des serres</a> ·
         <a id="plus-ermess" href="#" target="_blank" rel="noopener" style="color:var(--accent)" data-i18n="commun.ermess_plus_long">En savoir plus sur ERMESS Green ↗</a></div></div>
       <div id="langue"></div>
     </div>
@@ -194,11 +194,11 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { CSS2DRenderer, CSS2DObject } from "three/addons/renderers/CSS2DRenderer.js";
-import { ERMESS, remplirPartenaires } from "/logos/liens.js";
-import { t, appliquer, selecteurLangue, champSite, libelle, avecLangue, LOCALE, SEPARATEURS } from "/onglets/i18n.js";
+import { ERMESS, remplirPartenaires } from "./logos/liens.js";
+import { t, appliquer, selecteurLangue, champSite, libelle, avecLangue, LOCALE, SEPARATEURS } from "./onglets/i18n.js";
 appliquer(); selecteurLangue(document.getElementById("langue"));
-document.getElementById("retour").href = avecLangue("/");
-document.querySelector("#rail a.accueil").href = avecLangue("/");
+document.getElementById("retour").href = avecLangue("./");
+document.querySelector("#rail a.accueil").href = avecLangue("./");
 for (const o of document.getElementById("variable").options) {
   const base = o.textContent.match(/\((.+)\)$/); o.textContent = t("var." + o.value) + (base ? ` (${base[1]})` : "");
 }
@@ -213,7 +213,7 @@ const VARS_ = {
   soil_hum:{l:"Humidité du sol",u:"%",d:1}, soil_temp:{l:"T° du sol",u:"°C",d:1}, pore_ec:{l:"CE solution du sol",u:"mS/cm",d:2},
 };
 const VARS = Object.fromEntries(Object.entries(VARS_).map(([k, v]) => [k, { ...v, l: t("var." + k) }]));
-const VIEUX_MIN = 30;                 // au-delà : capteur considéré hors ligne
+const VIEUX_MIN = window.ERMESS_STATIQUE ? 90 : 30;   // au-delà : capteur considéré hors ligne (version publique : données rafraîchies ~15 min)
 const POLL_MS = 60_000;
 // viridis (8 arrêts)
 const RAMPE = ["#440154","#46327e","#365c8d","#277f8e","#1fa187","#4ac16d","#a0da39","#fde725"];
@@ -252,7 +252,7 @@ function chargerDecor(st) {
   masquables.length = 0; cliquables = [];
   if (st.modele) {
     centre.set(14.75, 1, -17.75); VUE_DEF.set(48, 30, 14);
-    loader.load("/modele/" + st.modele, g => {
+    loader.load("modele/" + st.modele, g => {
       g.scene.traverse(o => {
         if (!o.isMesh) return;
         const n = o.name || "";
@@ -402,7 +402,7 @@ async function choisir(rid) {
     <div id="courbe"></div>`;
   majEdition();
   try {
-    const j = await (await fetch(api("/api/series", `&remotes=${rid}&var=${VAR}&hours=48`))).json();
+    const j = await (await fetch(api("api/series", `&remotes=${rid}&var=${VAR}&hours=48`))).json();
     const s = j.series?.[rid]; if (!s || !s.t.length || SEL !== rid) return;
     const css = getComputedStyle(document.documentElement);
     Plotly.newPlot("courbe", [{ x: s.t, y: s.y, mode: "lines", line: { color: css.getPropertyValue("--accent"), width: 1.8 } }],
@@ -459,7 +459,7 @@ document.getElementById("ed-annul").onclick = () => { if (AVANT_EDIT) POS.capteu
 document.getElementById("ed-save").onclick = async () => {
   const msg = document.getElementById("ed-msg"); msg.textContent = t("serre.enreg");
   try {
-    const r = await fetch(api("/api/capteurs"), { method: "POST", headers: { "Content-Type": "application/json" },
+    const r = await fetch(api("api/capteurs"), { method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ capteurs: POS.capteurs }) });
     const j = await r.json(); if (!r.ok) throw new Error(j.error);
     POS = j; AVANT_EDIT = JSON.parse(JSON.stringify(POS.capteurs));
@@ -489,8 +489,8 @@ function bandeau(t) { const b = document.getElementById("bandeau"); b.textConten
 async function rafraichir() {
   try {
     const [p, l] = await Promise.all([
-      EDIT ? Promise.resolve(null) : fetch(api("/api/capteurs")).then(r => r.json()),
-      fetch(api("/api/latest")).then(r => r.json()),
+      EDIT ? Promise.resolve(null) : fetch(api("api/capteurs")).then(r => r.json()),
+      fetch(api("api/latest")).then(r => r.json()),
     ]);
     if (l.error) throw new Error(l.error);
     if (l.site !== SITE) return;          // réponse d'un site quitté entre-temps
@@ -501,7 +501,7 @@ async function rafraichir() {
       t("serre.statut", { c: (l.centrals || []).join(" + "), n: Object.keys(l.remotes).length, p: n,
         off: off ? t("serre.statut_off", { n: off }) : "", h: l.updated.slice(11, 16) });
     bandeau(l.erreur ? l.erreur
-      : Object.values(POS.capteurs).some(c => c.a_valider) ? t("serre.provisoires") : "");
+      : !window.ERMESS_STATIQUE && Object.values(POS.capteurs).some(c => c.a_valider) ? t("serre.provisoires") : "");
     majScene();
   } catch (e) { document.getElementById("statut").textContent = t("serre.erreur_api", { msg: e.message }); }
 }
@@ -532,7 +532,7 @@ function ouvrirOnglet(o) {
   labels.domElement.style.display = o === "suivi" ? "" : "none";   // sinon les étiquettes 3D débordent
   if (o === "suivi") { cadre.style.display = "none"; }
   else {
-    const url = avecLangue(`/onglets/${o}.html?site=${encodeURIComponent(SITE || "bocage")}`);
+    const url = avecLangue(`onglets/${o}.html?site=${encodeURIComponent(SITE || "bocage")}`);
     if (ifr.dataset.url !== url) { ifr.src = url; ifr.dataset.url = url; }
     cadre.style.display = "block";
   }
@@ -542,7 +542,7 @@ function ouvrirOnglet(o) {
 }
 document.querySelectorAll("#rail button").forEach(b => b.onclick = () => ouvrirOnglet(b.dataset.onglet));
 (async () => {
-  SITES = await (await fetch("/api/sites")).json();
+  SITES = await (await fetch("api/sites")).json();
   const sel = document.getElementById("site");
   SITES = Object.fromEntries(Object.entries(SITES).filter(([, st]) => st.actif));
   for (const [sid, st] of Object.entries(SITES)) sel.add(new Option(champSite(st, "nom"), sid));

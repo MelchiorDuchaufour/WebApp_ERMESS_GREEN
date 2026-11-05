@@ -352,7 +352,7 @@ class Handler(BaseHTTPRequestHandler):
         try:
             if u.path == "/":
                 return self._send(200, (ICI / "accueil.html").read_bytes(), "text/html; charset=utf-8")
-            if u.path == "/serre":
+            if u.path in ("/serre", "/serre.html"):
                 return self._send(200, (ICI / "index.html").read_bytes(), "text/html; charset=utf-8")
             if u.path.startswith("/logos/"):
                 return self._statique(ICI / "logos", u.path[len("/logos/"):])

@@ -11,3 +11,4 @@ __pycache__/
 **/donnees/cache_pvgis/
 *.blend1
 app_dev/
+_site/

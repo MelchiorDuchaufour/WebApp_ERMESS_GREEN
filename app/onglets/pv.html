@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Potentiel photovoltaïque</title>
-<link rel="stylesheet" href="/onglets/commun.css">
+<link rel="stylesheet" href="./commun.css">
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
 </head>
 <body>
@@ -67,7 +67,7 @@
   </div>
 </main>
 <script type="module">
-import { lieuDuSite, geometrie, RIGERIE, pvgis, MOIS, fmt, barres, tableau } from "/onglets/commun.js";
+import { lieuDuSite, geometrie, RIGERIE, pvgis, MOIS, fmt, barres, tableau } from "./commun.js";
 const TECH = { opaque: { wc: 210, t: 0.0 }, semi: { wc: 120, t: 0.4 }, mince: { wc: 60, t: 0.5 } };
 const $ = id => document.getElementById(id);
 const lieu = await lieuDuSite();

@@ -264,5 +264,5 @@ export function selecteurLangue(conteneur) {
 
 // Ajoute ?lang= à une adresse interne (iframes des onglets, liens entre pages)
 export function avecLangue(url) {
-  const u = new URL(url, location.origin); u.searchParams.set("lang", LANG); return u.pathname + u.search + u.hash;
+  const u = new URL(url, location.href); u.searchParams.set("lang", LANG); return u.href;
 }

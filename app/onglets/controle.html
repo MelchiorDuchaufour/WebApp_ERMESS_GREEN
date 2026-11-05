@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title data-i18n="ctl.titre_page">Contrôle des actionneurs</title>
-<link rel="stylesheet" href="/onglets/commun.css">
+<link rel="stylesheet" href="./commun.css">
 <style>
 .curseur{display:grid;grid-template-columns:130px 1fr 54px;gap:10px;align-items:center;margin:10px 0;font-size:13px}
 .curseur output{font-variant-numeric:tabular-nums;text-align:right;font-weight:600}
@@ -38,7 +38,7 @@ svg text{font:11px system-ui,sans-serif;fill:var(--muted)}
   </div>
 </main>
 <script type="module">
-import { t, appliquer } from "/onglets/i18n.js";
+import { t, appliquer } from "./i18n.js";
 appliquer();
 document.querySelectorAll(".i-ecran").forEach(e => e.textContent = t("ctl.ecran", { n: e.dataset.n }));
 const $ = id => document.getElementById(id);
@@ -82,7 +82,7 @@ document.querySelectorAll("input[type=range]").forEach(r => r.oninput = () => { 
 async function envoyer(a = etatCourant()) {
   const etat = $("etat"); etat.className = "etat"; etat.textContent = t("serre.enreg");
   try {
-    const r = await fetch(`/api/actionneurs?site=${SITE}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(a) });
+    const r = await fetch(`../api/actionneurs?site=${SITE}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(a) });
     const j = await r.json(); if (!r.ok) throw new Error(j.error);
     afficher(j); etat.textContent = t("ctl.enregistre");
   } catch (e) { etat.className = "etat erreur"; etat.textContent = t("commun.echec", { msg: e.message }); }
@@ -90,7 +90,7 @@ async function envoyer(a = etatCourant()) {
 $("envoyer").onclick = () => envoyer();
 $("nuit").onclick = () => envoyer({ ecrans: [1, 1, 1], ouvrants_deg: 0, chauffage: 0.7, source: t("ctl.src_nuit") });
 $("jour").onclick = () => envoyer({ ecrans: [0.6, 0.6, 0.6], ouvrants_deg: 35, chauffage: 0, source: t("ctl.src_jour") });
-afficher(await (await fetch(`/api/actionneurs?site=${SITE}`)).json());
+afficher(await (await fetch(`../api/actionneurs?site=${SITE}`)).json());
 </script>
 </body>
 </html>
