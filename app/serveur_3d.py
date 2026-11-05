@@ -52,7 +52,7 @@ _LOCKS: dict[str, threading.Lock] = {}
 _LAT: dict[str, dict] = {}
 _SERIES: dict[tuple, list] = {}          # (site, rid) -> lignes triées par temps
 _ORIGINE: dict[str, dict] = {}           # site -> {rid: source} (quelle clé interroge ce capteur)
-MIME = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".svg": "image/svg+xml",
+MIME = {".json": "application/json", ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".svg": "image/svg+xml",
         ".glb": "model/gltf-binary",
         ".js": "text/javascript; charset=utf-8",
         ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8"}
@@ -356,6 +356,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(200, (ICI / "index.html").read_bytes(), "text/html; charset=utf-8")
             if u.path.startswith("/logos/"):
                 return self._statique(ICI / "logos", u.path[len("/logos/"):])
+            if u.path.startswith("/donnees/carte/"):
+                return self._statique(ICI / "donnees" / "carte", u.path[len("/donnees/carte/"):])
             if u.path.startswith("/modele/"):
                 nom = u.path[len("/modele/"):]
                 if nom not in {s.get("modele") for s in INFOS.values()}:

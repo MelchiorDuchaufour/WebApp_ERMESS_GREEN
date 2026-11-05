@@ -55,6 +55,7 @@ def pages(out: Path) -> None:
                         ignore=shutil.ignore_patterns("__pycache__", "*.py"))
     for f in (out / "onglets").glob("*.html"):
         f.write_text(injecter(f.read_text(encoding="utf-8"), "../statique.js"), encoding="utf-8")
+    shutil.copytree(APP / "donnees" / "carte", out / "donnees" / "carte", dirs_exist_ok=True)
     (out / "modele").mkdir(exist_ok=True)
     for s in S.INFOS.values():
         if s.get("modele"):

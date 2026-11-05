@@ -114,12 +114,26 @@ const tY = lat => { const r = lat * Math.PI / 180; return (1 - Math.asinh(Math.t
 const x0 = Math.floor(tX(B.lonMin)), x1 = Math.floor(tX(B.lonMax));
 const y0 = Math.floor(tY(B.latMax)), y1 = Math.floor(tY(B.latMin));
 let ELEV = null, EW = 0, EH = 0;
+// Données de carte hébergées avec le site (donnees/carte/), service d'origine en secours.
+// Délai maximal par fichier : une ressource qui ne répond pas ne bloque plus la page.
+async function recuperer(urls, ms = 12000) {
+  let err;
+  for (const url of urls) {
+    const ctl = new AbortController(), minuterie = setTimeout(() => ctl.abort(), ms);
+    try {
+      const r = await fetch(url, { signal: ctl.signal });
+      if (!r.ok) throw new Error(`${r.status} ${url}`);
+      return r;
+    } catch (e) { err = e; } finally { clearTimeout(minuterie); }
+  }
+  throw err;
+}
 async function chargerRelief() {
   EW = (x1 - x0 + 1) * 256; EH = (y1 - y0 + 1) * 256;
   const cv = new OffscreenCanvas(EW, EH), ctx = cv.getContext("2d");
   const jobs = [];
   for (let x = x0; x <= x1; x++) for (let y = y0; y <= y1; y++) jobs.push((async () => {
-    const r = await fetch(`https://s3.amazonaws.com/elevation-tiles-prod/terrarium/${Z}/${x}/${y}.png`);
+    const r = await recuperer([`donnees/carte/t${Z}_${x}_${y}.png`, `https://s3.amazonaws.com/elevation-tiles-prod/terrarium/${Z}/${x}/${y}.png`]);
     ctx.drawImage(await createImageBitmap(await r.blob()), (x - x0) * 256, (y - y0) * 256);
   })());
   await Promise.all(jobs);
@@ -162,7 +176,7 @@ async function texture() {
   }
   ctx.putImageData(img, 0, 0);
   // pays (Natural Earth 1:10 M)
-  const topo = await (await fetch("https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-10m.json")).json();
+  const topo = await (await recuperer(["donnees/carte/frontieres_fr_it.json", "https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-10m.json"])).json();
   const pays = topojson.feature(topo, topo.objects.countries).features;
   const proj = ([lon, lat]) => [(lon - B.lonMin) / (B.lonMax - B.lonMin) * TW, (B.latMax - lat) / (B.latMax - B.latMin) * TH];
   const tracer = geom => {
@@ -338,19 +352,28 @@ function majSurvol() {
 
 (function boucle() { requestAnimationFrame(boucle); controls.update(); majSurvol(); renderer.render(scene, camera); css.render(scene, camera); })();
 
-(async () => {
-  try {
-    await chargerRelief();
-    terrain(await texture());
-    document.getElementById("chargement").remove();
-  } catch (e) {
-    console.error("relief", e);
-    document.getElementById("chargement").textContent = t("acc.relief_ko", { msg: e.message || e });
-    const plan = new THREE.Mesh(new THREE.PlaneGeometry(W, H).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0xcfd6c4 }));
-    scene.add(plan);
+// Relief : jusqu'à 3 tentatives automatiques, puis bouton « Réessayer » (jamais de carte plate).
+async function demarrer() {
+  const msg = document.getElementById("chargement");
+  for (let essai = 1; essai <= 3; essai++) {
+    try {
+      msg.textContent = essai === 1 ? t("acc.chargement") : t("acc.nouvel_essai", { n: essai });
+      await chargerRelief();
+      terrain(await texture());
+      msg.remove();
+      await placerSites();
+      return;
+    } catch (e) {
+      console.error("relief", e);
+      await new Promise(r => setTimeout(r, 1500 * essai));
+    }
   }
-  await placerSites();
-})();
+  msg.replaceChildren(document.createTextNode(t("acc.relief_ko") + " "));
+  const b = document.createElement("button"); b.textContent = t("acc.reessayer");
+  b.style.cssText = "font:inherit;margin-left:6px;padding:4px 10px;border-radius:6px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer";
+  b.onclick = () => demarrer(); msg.append(b);
+}
+demarrer();
 </script>
 </body>
 </html>
