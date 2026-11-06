@@ -47,6 +47,7 @@ const D = {
   "acc.sous":         { fr: "Capteurs Sigrow en temps réel · Interreg Alcotra ERMESS Green", it: "Sensori Sigrow in tempo reale · Interreg Alcotra ERMESS Green", en: "Real-time Sigrow sensors · Interreg Alcotra ERMESS Green" },
   "acc.chargement":   { fr: "Chargement du relief…", it: "Caricamento del rilievo…", en: "Loading terrain…" },
   "acc.aide":         { fr: "Survole une serre, clique pour l'ouvrir · glisser pour tourner, molette pour zoomer", it: "Passa sopra una serra, clicca per aprirla · trascina per ruotare, rotellina per lo zoom", en: "Hover a greenhouse, click to open it · drag to rotate, scroll to zoom" },
+  "acc.aide_tactile": { fr: "Touche une serre pour l'ouvrir · glisser pour tourner, pincer pour zoomer", it: "Tocca una serra per aprirla · trascina per ruotare, pizzica per lo zoom", en: "Tap a greenhouse to open it · drag to rotate, pinch to zoom" },
   "acc.source":       { fr: "Relief : Mapzen Terrarium (AWS) · Frontières : Natural Earth", it: "Rilievo: Mapzen Terrarium (AWS) · Confini: Natural Earth", en: "Terrain: Mapzen Terrarium (AWS) · Borders: Natural Earth" },
   "acc.relief_ko":    { fr: "Le relief n'a pas pu être chargé.", it: "Impossibile caricare il rilievo.", en: "The terrain could not be loaded." },
   "acc.nouvel_essai": { fr: "Chargement du relief… (essai {n}/3)", it: "Caricamento del rilievo… (tentativo {n}/3)", en: "Loading terrain… (attempt {n}/3)" },

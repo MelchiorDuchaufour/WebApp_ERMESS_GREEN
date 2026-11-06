@@ -59,12 +59,15 @@
     input[type=range]{pointer-events:none;opacity:.55}
     #mode-statique{position:fixed;z-index:40;right:12px;bottom:12px;max-width:calc(100% - 24px);font:12px/1.3 system-ui,sans-serif;
       color:#5f4a12;background:#fff4d6;border:1px solid #e8cf8a;border-radius:10px;padding:4px 10px;pointer-events:none}
+    #mode-statique.accueil{bottom:104px}
+    @media (max-width:820px){#mode-statique{bottom:70px}}
+    @media (max-width:720px){#mode-statique.accueil{left:8px;right:8px;bottom:48px;font-size:10px;text-align:center;max-width:none}}
     @media (prefers-color-scheme: dark){#mode-statique{color:#f3dfa5;background:#3a3220;border-color:#6b5a2e}}`;
   document.head.appendChild(css);
   addEventListener("DOMContentLoaded", () => {
     if (window.top !== window) return;                    // onglets en iframe : bandeau dans la page parente
     const b = document.createElement("div"); b.id = "mode-statique"; b.textContent = M.bandeau;
-    if (document.getElementById("partenaires") && document.getElementById("titre")) b.style.bottom = "104px";   // accueil
+    if (document.getElementById("partenaires") && document.getElementById("titre")) b.classList.add("accueil");   // accueil
     document.body.appendChild(b);
   });
 })();

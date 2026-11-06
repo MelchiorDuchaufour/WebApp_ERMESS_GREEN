@@ -68,13 +68,20 @@ html,body{margin:0;height:100%;overflow:hidden;color:var(--ink);
 #langue button{font:600 12px/1 system-ui,sans-serif;border:0;background:transparent;color:var(--muted);padding:6px 9px;border-radius:6px;cursor:pointer}
 #langue button[aria-pressed="true"]{background:var(--accent);color:#fff}
 #source{position:fixed;right:10px;bottom:84px;z-index:5;font-size:10px;color:var(--muted)}
+@media (pointer:coarse){ .fiche{pointer-events:auto;cursor:pointer} }
 @media (max-width:720px){
   #logo img{height:64px}
-  #titre{top:auto;bottom:118px;width:calc(100% - 32px)}
-  #titre h1{font-size:17px}
-  #partenaires{gap:12px;padding:8px}
-  #partenaires img{height:30px}
-  #aide{bottom:64px}
+  #titre{top:104px;width:calc(100% - 24px)}
+  #titre h1{font-size:16px}
+  #titre p{font-size:11px}
+  #partenaires{gap:6px;padding:6px 8px;flex-wrap:nowrap;justify-content:space-between}
+  #partenaires > *{flex:0 1 auto;min-width:0}
+  #partenaires img{height:26px;max-width:100%;padding:2px 3px}
+  #source{left:8px;right:8px;bottom:136px;text-align:center;font-size:9px}
+  .fiche{min-width:0;max-width:150px;padding:5px 8px;margin-top:-52px}
+  .fiche b{font-size:12px} .fiche .l + .l{display:none} .fiche .v{font-size:11px}
+  .ville{font-size:10px}
+  #aide{bottom:94px;width:calc(100% - 24px);text-align:center;font-size:11px;padding:3px 8px}
 }
 </style>
 </head>
@@ -96,6 +103,7 @@ import { CSS2DRenderer, CSS2DObject } from "three/addons/renderers/CSS2DRenderer
 import { ERMESS, remplirPartenaires } from "./logos/liens.js";
 import { t, appliquer, selecteurLangue, champSite, avecLangue } from "./onglets/i18n.js";
 appliquer(); selecteurLangue(document.getElementById("langue"));
+if (matchMedia("(pointer:coarse)").matches) document.getElementById("aide").textContent = t("acc.aide_tactile");
 document.getElementById("logo").href = ERMESS;
 remplirPartenaires(document.getElementById("partenaires"));
 
@@ -205,15 +213,24 @@ renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); el.appendChild(renderer.d
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 const css = new CSS2DRenderer(); css.domElement.style.cssText = "position:absolute;inset:0;pointer-events:none"; el.appendChild(css.domElement);
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(35, 1, 1, 5000);
-camera.position.set(0, 330, 360);
+const camera = new THREE.PerspectiveCamera(35, 1, 20, 6000);   // near élevé : pas de scintillement de la mer au recul
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true; controls.minDistance = 60; controls.maxDistance = 900;
 controls.maxPolarAngle = Math.PI * 0.42; controls.minPolarAngle = Math.PI * 0.08;
 controls.target.set(-10, 0, 10);
+// Cadrage : sur écran étroit (téléphone en portrait), recule la caméra pour garder les deux serres visibles.
+let RECUL = 0;
+function cadrer() {
+  const f = Math.max(1, 1.2 / (innerWidth / innerHeight));
+  if (f === RECUL) return;
+  RECUL = f;
+  camera.position.set(-10 + 10 * f, 330 * f, 10 + 350 * f);   // cible + recul × f
+  controls.maxDistance = 900 * f;
+}
+cadrer();
 scene.add(new THREE.HemisphereLight(0xffffff, 0x9aa58c, 1.5));
 const sun = new THREE.DirectionalLight(0xfff4e0, 2.2); sun.position.set(-300, 260, -120); scene.add(sun);
-function redim() { renderer.setSize(innerWidth, innerHeight); css.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); }
+function redim() { cadrer(); renderer.setSize(innerWidth, innerHeight); css.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); }
 addEventListener("resize", redim); redim();
 
 function terrain(tex) {
@@ -230,7 +247,7 @@ function terrain(tex) {
   scene.add(m);
   // socle : épaisseur sous la carte
   const socle = new THREE.Mesh(new THREE.BoxGeometry(W, 6, H), new THREE.MeshStandardMaterial({ color: 0x8c8676, roughness: 1 }));
-  socle.position.y = -3.05; scene.add(socle);
+  socle.position.y = -3.6; scene.add(socle);
 }
 
 function etiquette(html, cls, lon, lat, dy = 1.5) {
@@ -310,6 +327,7 @@ async function placerSites() {
     d.innerHTML = `<b><span class="drapeau" style="background:${l.pays === "IT" ? "#2f9e5a" : "#3b6fb6"}">${l.pays}</span>${champSite(s, "nom")}</b>
       <div class="l">${l.ville}${l.a_confirmer ? ` <span class="conf">· ${t("acc.a_confirmer")}</span>` : ""}</div>
       <div class="l">${champSite(s, "description")}</div><div class="v">${s.actif ? t("acc.mesures_charge") : t("acc.pas_capteurs")}</div>`;
+    d.onclick = () => ouvrir(sid);          // fiche touchable sur téléphone (cf. pointer:coarse)
     const o = new CSS2DObject(d); o.position.set(0, 6, 0); g.add(o);
     serres.push({ sid, g, d, cible: TAILLE, actif: s.actif });
     if (s.actif) resume(sid, d.querySelector(".v"));
@@ -331,12 +349,32 @@ async function resume(sid, el) {
 // ---------- survol et clic ----------
 const ray = new THREE.Raycaster(), souris = new THREE.Vector2(-9, -9);
 let survol = null, bas = null;
-renderer.domElement.addEventListener("pointermove", e => { souris.set(e.clientX / innerWidth * 2 - 1, -e.clientY / innerHeight * 2 + 1); });
+const versSouris = e => souris.set(e.clientX / innerWidth * 2 - 1, -e.clientY / innerHeight * 2 + 1);
+const TOLERANCE_DOIGT = 44;   // px autour d'une serre : un tap n'a pas besoin de tomber pile dessus
+const ouvrir = sid => { if (serres.find(s => s.sid === sid)?.actif) location.href = avecLangue(`serre.html#${sid}`); };
+// Serre sous le pointeur, calculée au moment du tap : un doigt ne survole rien avant de toucher.
+function serreSous(e) {
+  versSouris(e); ray.setFromCamera(souris, camera);
+  const hit = ray.intersectObjects(serres.map(s => s.g), true)[0];
+  if (hit) return hit.object.userData.sid;
+  if (e.pointerType !== "touch") return null;
+  let proche = null, dmin = TOLERANCE_DOIGT;
+  for (const s of serres) {
+    const v = s.g.getWorldPosition(new THREE.Vector3()).project(camera);
+    const d = Math.hypot((v.x + 1) / 2 * innerWidth - e.clientX, (1 - v.y) / 2 * innerHeight - e.clientY);
+    if (d < dmin) { dmin = d; proche = s.sid; }
+  }
+  return proche;
+}
+renderer.domElement.addEventListener("pointermove", versSouris);
 renderer.domElement.addEventListener("pointerleave", () => souris.set(-9, -9));
 renderer.domElement.addEventListener("pointerdown", e => { bas = [e.clientX, e.clientY]; });
 renderer.domElement.addEventListener("pointerup", e => {
-  if (bas && Math.hypot(e.clientX - bas[0], e.clientY - bas[1]) < 5 && survol
-      && serres.find(s => s.sid === survol)?.actif) location.href = avecLangue(`serre.html#${survol}`);
+  const tactile = e.pointerType === "touch";
+  if (bas && Math.hypot(e.clientX - bas[0], e.clientY - bas[1]) < (tactile ? 12 : 5)) {
+    const sid = serreSous(e); if (sid) ouvrir(sid);
+  }
+  if (tactile) souris.set(-9, -9);       // pas de survol qui reste affiché après le tap
 });
 function majSurvol() {
   ray.setFromCamera(souris, camera);
