@@ -2,55 +2,6 @@
   "repere": "Plan Rigerie (plan_rigerie.py) : x le long du mur haut (0 = mur gauche), y vers le mur haut (0 = pied du mur droit), z vertical depuis le sol. Mètres.",
   "note": "Positions provisoires, déduites des noms Sigrow et du schéma de greenhouse_map.py (transect central, hauteurs Haut 2,4 m / Tablette 0,95 m). Le Nord n'est pas indiqué sur le plan 2012 : on suppose Sud = petits y (rangs 4-5) et Fond Nord = rang 2. À corriger dans la page (mode édition).",
   "capteurs": {
-    "58579": {
-      "x": 15.0,
-      "y": 4.0,
-      "z": 2.4,
-      "label": "Sud-Bord · Haut",
-      "a_valider": true
-    },
-    "22278": {
-      "x": 15.0,
-      "y": 16.1,
-      "z": 2.4,
-      "label": "Milieu · Haut",
-      "a_valider": true
-    },
-    "32224": {
-      "x": 15.0,
-      "y": 16.1,
-      "z": 0.95,
-      "label": "Milieu · Tablette",
-      "a_valider": true
-    },
-    "27752": {
-      "x": 15.0,
-      "y": 20.8,
-      "z": 2.4,
-      "label": "Nord entre rang · Haut",
-      "a_valider": true
-    },
-    "46070": {
-      "x": 15.0,
-      "y": 25.5,
-      "z": 2.4,
-      "label": "Fond · Haut",
-      "a_valider": true
-    },
-    "21546": {
-      "x": 15.0,
-      "y": 25.5,
-      "z": 0.95,
-      "label": "Fond · Tablette",
-      "a_valider": true
-    },
-    "65048": {
-      "x": 32.0,
-      "y": 20.0,
-      "z": 2.0,
-      "label": "Extérieur",
-      "a_valider": true
-    },
     "1391": {
       "x": 15.79,
       "y": 31.85,

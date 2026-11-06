@@ -3,11 +3,6 @@
     "nom": "Serre Rigerie · Bocage",
     "sources": [
       {
-        "central": 28896,
-        "cle": "SIGROW_API_KEY",
-        "filtre": "Bocage"
-      },
-      {
         "central": 15353,
         "cle": "SIGROW_API_KEY_15353",
         "filtre": ""
@@ -32,7 +27,15 @@
         "description": "Large glass multi-span greenhouse, 1,020 m², 41 benches",
         "nom": "Rigerie greenhouse · Bocage"
       }
-    }
+    },
+    "_sources_retirees": [
+      {
+        "central": 28896,
+        "cle": "SIGROW_API_KEY",
+        "filtre": "Bocage",
+        "note": "Sondes Agrithermic (central PHENIX) retirées de l'affichage le 2026-11-06"
+      }
+    ]
   },
   "savona": {
     "nom": "Site pilote de Savona",

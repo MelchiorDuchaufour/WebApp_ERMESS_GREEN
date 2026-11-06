@@ -1,0 +1,53 @@
+{
+  "capteurs": {
+    "58579": {
+      "x": 15.0,
+      "y": 4.0,
+      "z": 2.4,
+      "label": "Sud-Bord · Haut",
+      "a_valider": true
+    },
+    "22278": {
+      "x": 15.0,
+      "y": 16.1,
+      "z": 2.4,
+      "label": "Milieu · Haut",
+      "a_valider": true
+    },
+    "32224": {
+      "x": 15.0,
+      "y": 16.1,
+      "z": 0.95,
+      "label": "Milieu · Tablette",
+      "a_valider": true
+    },
+    "27752": {
+      "x": 15.0,
+      "y": 20.8,
+      "z": 2.4,
+      "label": "Nord entre rang · Haut",
+      "a_valider": true
+    },
+    "46070": {
+      "x": 15.0,
+      "y": 25.5,
+      "z": 2.4,
+      "label": "Fond · Haut",
+      "a_valider": true
+    },
+    "21546": {
+      "x": 15.0,
+      "y": 25.5,
+      "z": 0.95,
+      "label": "Fond · Tablette",
+      "a_valider": true
+    },
+    "65048": {
+      "x": 32.0,
+      "y": 20.0,
+      "z": 2.0,
+      "label": "Extérieur",
+      "a_valider": true
+    }
+  }
+}
