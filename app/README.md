@@ -83,7 +83,7 @@ Agrithermic est vide, à compléter).
 | Potentiel PV (**en veille** : bouton masqué dans `index.html`, attribut `hidden` ; `?onglet=pv` renvoie au Suivi) | Puissance, production mensuelle, ombrage moyen de modules sur les pans de toiture | PVGIS PVcalc (JRC) via `/api/pv` |
 | Énergie | Besoin de chauffage horaire, mensuel et annuel | année météo type PVGIS via `/api/tmy` ; modèle stationnaire simplifié (`onglets/commun.js`) |
 | Rénovation | Économies : écran thermique, double paroi, isolation mur nord, étanchéité, consigne de nuit, combinaison | même modèle |
-| Contrôle | Saisie de l'état des actionneurs, coupe des 3 nefs | `/api/actionneurs`, lu par Blender |
+| Contrôle | Saisie de l'état des actionneurs, coupe des 4 nefs | `/api/actionneurs`, lu par Blender |
 
 Les onglets PV, Énergie et Rénovation sont des **prévisualisations** : modèles simples,
 hypothèses affichées et modifiables. Le calcul détaillé relève de GreenhousesJL.
@@ -92,6 +92,20 @@ hypothèses affichées et modifiables. Le calcul détaillé relève de Greenhous
 `blender blender/serre_rigerie_detail.blend --python blender/blender_live.py`, puis barre
 latérale (N) > « Serre live ». Mode Serveur : lit `/api/latest`, `/api/capteurs` et
 `/api/actionneurs` toutes les 30 s. Mode Manuel : les curseurs pilotent la scène.
-Écrans : un par nef (3 nefs de 11,83 m), tirés depuis le chéneau, à 3,92 m. Ouvrants :
-les 58 ouvrants de la maquette, pivotant sur leur faîtage (0 à 45°). Aucun signal du
+Écrans : un par nef (4 nefs de 8,875 m), tirés depuis le chéneau, à 3,92 m. Ouvrants :
+les 78 ouvrants de la maquette, pivotant sur leur faîtage (0 à 45°). Aucun signal du
 régulateur n'est encore relié : l'état vient de l'onglet Contrôle.
+
+## Régénérer la maquette après un changement de géométrie
+
+Depuis `blender/`, après modification de `plan_rigerie.py` :
+
+```
+python3 plan_rigerie.py
+cp plan_rigerie/tablettes_rigerie.csv ../donnees/
+blender -b --factory-startup --python serre_rigerie_blender.py
+blender -b plan_rigerie/serre_rigerie.blend --python serre_rigerie_detail.py
+blender -b serre_rigerie_detail.blend --python export_glb.py
+```
+
+Ne pas relancer `placer_selon_plan.py` : il écraserait les positions ajustées à la main.

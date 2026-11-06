@@ -206,7 +206,7 @@ const D = {
   "ctl.envoyer":      { fr: "Enregistrer l'état", it: "Salva lo stato", en: "Save state" },
   "ctl.nuit":         { fr: "Préréglage nuit", it: "Preimpostazione notte", en: "Night preset" },
   "ctl.jour":         { fr: "Préréglage jour chaud", it: "Preimpostazione giorno caldo", en: "Hot-day preset" },
-  "ctl.coupe":        { fr: "Coupe transversale (3 nefs)", it: "Sezione trasversale (3 campate)", en: "Cross-section (3 spans)" },
+  "ctl.coupe":        { fr: "Coupe transversale (4 nefs)", it: "Sezione trasversale (4 campate)", en: "Cross-section (4 spans)" },
   "ctl.coupe_aria":   { fr: "Coupe de la serre avec écrans et ouvrants", it: "Sezione della serra con schermi e aperture", en: "Greenhouse cross-section with screens and vents" },
   "ctl.dernier":      { fr: "Dernier enregistrement : {maj} ({src})", it: "Ultimo salvataggio: {maj} ({src})", en: "Last saved: {maj} ({src})" },
   "ctl.jamais":       { fr: "Jamais enregistré", it: "Mai salvato", en: "Never saved" },

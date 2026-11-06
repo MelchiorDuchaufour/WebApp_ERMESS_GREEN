@@ -271,7 +271,7 @@ def ecrire_positions(sid, payload, note=None) -> dict:
 
 
 # ---------------------------------------------------------------- actionneurs
-ACT_DEFAUT = {"ecrans": [0.0, 0.0, 0.0], "ouvrants_deg": 0.0, "chauffage": 0.0,
+ACT_DEFAUT = {"ecrans": [0.0, 0.0, 0.0, 0.0], "ouvrants_deg": 0.0, "chauffage": 0.0,
               "source": "manuel", "maj": None}
 
 

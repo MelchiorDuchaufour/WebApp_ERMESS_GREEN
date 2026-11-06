@@ -1,6 +1,6 @@
 {
   "repere": "Plan Rigerie (plan_rigerie.py) : x le long du mur haut (0 = mur gauche), y vers le mur haut (0 = pied du mur droit), z vertical depuis le sol. Mètres.",
-  "note": "Positions provisoires, déduites des noms Sigrow et du schéma de greenhouse_map.py (transect central, hauteurs Haut 2,4 m / Tablette 0,95 m). Le Nord n'est pas indiqué sur le plan 2012 : on suppose Sud = petits y (rangs 4-5) et Fond Nord = rang 2. À corriger dans la page (mode édition).",
+  "note": "Positions ajustées à la main (06/11), puis décalées avec leurs bancs lors du passage à 4 nefs.",
   "capteurs": {
     "1391": {
       "x": 25.24,
@@ -11,16 +11,16 @@
     },
     "3678": {
       "x": 15.54,
-      "y": 21.51,
+      "y": 18.42,
       "z": 2.8,
       "label": "SoilPro+ 3678 · R2",
       "a_valider": false
     },
     "7467": {
       "x": 15.76,
-      "y": 12.94,
+      "y": 10.58,
       "z": 1.7,
-      "label": "Air+ 7467 · R1",
+      "label": "Air+ 7467 · R3",
       "a_valider": false
     },
     "14290": {
@@ -32,23 +32,23 @@
     },
     "14481": {
       "x": 7.48,
-      "y": 21.69,
+      "y": 18.59,
       "z": 1.0,
-      "label": "Pixel+ 14481 · R1",
+      "label": "Pixel+ 14481 · R2",
       "a_valider": false
     },
     "24094": {
       "x": 25.28,
       "y": 31.9,
       "z": 1.0,
-      "label": "Pixel+ 24094 · R2",
+      "label": "Pixel+ 24094 · R1",
       "a_valider": false
     },
     "28271": {
       "x": 15.53,
-      "y": 21.62,
+      "y": 18.52,
       "z": 1.0,
-      "label": "Pixel+ 28271 · entre R2 et R3",
+      "label": "Pixel+ 28271 · R2",
       "a_valider": false
     },
     "31175": {
@@ -62,19 +62,19 @@
       "x": 7.0,
       "y": 31.78,
       "z": 1.1,
-      "label": "Pixel+ 33232 · R3",
+      "label": "Pixel+ 33232 · R1",
       "a_valider": false
     },
     "34631": {
       "x": 15.61,
-      "y": 27.2,
+      "y": 23.6,
       "z": 4.2,
-      "label": "Air+ 34631 · R3",
+      "label": "Air+ 34631 · R2",
       "a_valider": false
     },
     "35301": {
       "x": 7.09,
-      "y": 1.57,
+      "y": 0.52,
       "z": 1.6,
       "label": "Air+ 35301 · R5",
       "a_valider": false
@@ -83,31 +83,31 @@
       "x": 15.79,
       "y": 31.84,
       "z": 2.8,
-      "label": "SoilPro+ 37510 · entre R2 et R3",
+      "label": "SoilPro+ 37510 · R1",
       "a_valider": false
     },
     "47884": {
       "x": 23.5,
-      "y": 21.25,
+      "y": 18.19,
       "z": 1.0,
-      "label": "SoilPro+ 47884 · R3",
+      "label": "SoilPro+ 47884 · R2",
       "a_valider": false
     },
     "54824": {
       "x": 26.49,
-      "y": 1.03,
+      "y": 0.34,
       "z": 2.2,
-      "label": "AirPro+ 54824 · entre R2 et R3",
+      "label": "AirPro+ 54824 · R5",
       "a_valider": false
     },
     "59525": {
       "x": 15.75,
       "y": 31.76,
       "z": 1.0,
-      "label": "AirPro+ 59525 · R5",
+      "label": "AirPro+ 59525 · R1",
       "a_valider": false
     }
   },
   "note_15353": "Capteurs du central 15353 placés par placer_selon_plan.py d'après « Plan Sigrow.png ». Attribution des identifiants à un symbole arbitraire (par type, ordre de lecture) : à valider.",
-  "maj": "2026-11-06 09:52"
+  "maj": "2026-11-06 11:00"
 }

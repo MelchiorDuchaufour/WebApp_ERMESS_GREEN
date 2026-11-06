@@ -4,8 +4,8 @@ serre_rigerie_blender.py — Maquette 3D de départ de la Serre Rigerie (Blender
 Reprend EXACTEMENT la géométrie au sol de plan_rigerie.py (enveloppe du plan
 2012, 41 tablettes) et ajoute la troisième dimension :
   - tablettes : plateau à 0,80 m (donné 22/09/2026), pieds 5 × 5 cm ;
-  - toiture à TRIPLE FAÎTAGE (donné) : 3 nefs égales, faîtages parallèles au
-    mur haut (29,50 m), nefs de 11,83 m. Nombre et sens : dans plan_rigerie.py ;
+  - toiture à 4 nefs égales (06/11/2026), faîtages parallèles au mur haut
+    (29,50 m), nefs de 8,875 m. Nombre et sens : dans plan_rigerie.py ;
   - hauteur de chéneau et pente : HYPOTHÈSES reprises de la config « Rigerie »
     grande-feuille de GreenhousesJL (chéneau 4 m, pente 23°) ;
   - réseau eau chaude / froide (photos bocage/rigerie_circu_eau/) : tubes verts
@@ -365,6 +365,11 @@ def reseau_3d(tabs, coll, m_vert, m_noir, m_galva, m_laiton):
             chaines += [[(px, py + side * 0.05, zc + 0.35), (px, li["y"], zc + R_TUBE)],
                         [(px, li["y"], zc - R_TUBE), (px, li["y"], zf + R_TUBE)]]
     objet("poteaux_supports_tubes", bm, coll, m_galva)
+    # rangées de poteaux sous les autres chéneaux (06/11/2026)
+    bm = bmesh.new()
+    for px, py in pr.poteaux_nefs(tabs):
+        boite(bm, px - 0.05, px + 0.05, py - 0.05, py + 0.05, 0.0, H_CHENEAU)
+    objet("poteaux_nefs", bm, coll, m_galva)
     tube("chaines", chaines, 0.006, coll, m_galva)
 
 

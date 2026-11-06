@@ -23,6 +23,7 @@ svg text{font:11px system-ui,sans-serif;fill:var(--muted)}
       <div class="curseur"><span class="i-ecran" data-n="1">Écran nef 1</span><input type="range" id="e0" min="0" max="100" step="5"><output id="o-e0"></output></div>
       <div class="curseur"><span class="i-ecran" data-n="2">Écran nef 2</span><input type="range" id="e1" min="0" max="100" step="5"><output id="o-e1"></output></div>
       <div class="curseur"><span class="i-ecran" data-n="3">Écran nef 3</span><input type="range" id="e2" min="0" max="100" step="5"><output id="o-e2"></output></div>
+      <div class="curseur"><span class="i-ecran" data-n="4">Écran nef 4</span><input type="range" id="e3" min="0" max="100" step="5"><output id="o-e3"></output></div>
       <div class="curseur"><span data-i18n="ctl.ouvrants">Ouvrants de faîtage</span><input type="range" id="ouv" min="0" max="45" step="1"><output id="o-ouv"></output></div>
       <div class="curseur"><span data-i18n="ctl.chauffage">Chauffage</span><input type="range" id="ch" min="0" max="100" step="5"><output id="o-ch"></output></div>
       <button id="envoyer" data-i18n="ctl.envoyer">Enregistrer l'état</button>
@@ -31,7 +32,7 @@ svg text{font:11px system-ui,sans-serif;fill:var(--muted)}
       <div class="etat" id="etat"></div>
     </div>
     <div class="carte">
-      <h2 data-i18n="ctl.coupe">Coupe transversale (3 nefs)</h2>
+      <h2 data-i18n="ctl.coupe">Coupe transversale (4 nefs)</h2>
       <svg id="coupe" viewBox="0 0 720 260" width="100%" role="img" aria-label="Coupe de la serre avec écrans et ouvrants" data-i18n-aria="ctl.coupe_aria"></svg>
       <div class="note" id="maj"></div>
     </div>
@@ -43,27 +44,27 @@ appliquer();
 document.querySelectorAll(".i-ecran").forEach(e => e.textContent = t("ctl.ecran", { n: e.dataset.n }));
 const $ = id => document.getElementById(id);
 const SITE = new URLSearchParams(location.search).get("site") || "bocage";
-const etatCourant = () => ({ ecrans: [0, 1, 2].map(i => +$("e" + i).value / 100), ouvrants_deg: +$("ouv").value,
+const etatCourant = () => ({ ecrans: [0, 1, 2, 3].map(i => +$("e" + i).value / 100), ouvrants_deg: +$("ouv").value,
                              chauffage: +$("ch").value / 100, source: t("ctl.src_manuel") });
 function afficher(a) {
-  [0, 1, 2].forEach(i => $("e" + i).value = Math.round((a.ecrans[i] ?? 0) * 100));
+  [0, 1, 2, 3].forEach(i => $("e" + i).value = Math.round((a.ecrans[i] ?? 0) * 100));
   $("ouv").value = a.ouvrants_deg; $("ch").value = Math.round(a.chauffage * 100);
   sorties(); dessiner();
   $("maj").textContent = a.maj ? t("ctl.dernier", { maj: a.maj, src: a.source }) : t("ctl.jamais");
 }
 function sorties() {
-  [0, 1, 2].forEach(i => $("o-e" + i).value = $("e" + i).value + " %");
+  [0, 1, 2, 3].forEach(i => $("o-e" + i).value = $("e" + i).value + " %");
   $("o-ouv").value = $("ouv").value + "°"; $("o-ch").value = $("ch").value + " %";
 }
 function dessiner() {
   const css = getComputedStyle(document.documentElement), c = k => css.getPropertyValue(k).trim();
-  const W = 720, x0 = 40, nef = (W - 2 * x0) / 3, sol = 230, ch = 120, fa = 70, a = etatCourant();
+  const W = 720, x0 = 40, nef = (W - 2 * x0) / 4, sol = 230, ch = 120, fa = 70, a = etatCourant();
   let s = `<line x1="${x0 - 20}" y1="${sol}" x2="${W - x0 + 20}" y2="${sol}" stroke="${c("--line")}" stroke-width="2"/>`;
   // tubes de chauffage
   const chaud = a.chauffage;
   s += `<line x1="${x0}" y1="${sol - 18}" x2="${W - x0}" y2="${sol - 18}" stroke="rgb(${Math.round(40 + 180 * chaud)},${Math.round(90 - 50 * chaud)},60)" stroke-width="${3 + 3 * chaud}" stroke-linecap="round"/>`;
   s += `<text x="${x0}" y="${sol - 26}">${t("ctl.svg_chauffage", { n: Math.round(chaud * 100) })}</text>`;
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 4; i++) {
     const xa = x0 + i * nef, xb = xa + nef, xm = (xa + xb) / 2;
     s += `<polyline points="${xa},${sol} ${xa},${ch} ${xm},${fa} ${xb},${ch} ${xb},${sol}" fill="none" stroke="${c("--muted")}" stroke-width="1.5"/>`;
     // ouvrant : pan côté droit du faîtage, charnière au faîtage
@@ -88,8 +89,8 @@ async function envoyer(a = etatCourant()) {
   } catch (e) { etat.className = "etat erreur"; etat.textContent = t("commun.echec", { msg: e.message }); }
 }
 $("envoyer").onclick = () => envoyer();
-$("nuit").onclick = () => envoyer({ ecrans: [1, 1, 1], ouvrants_deg: 0, chauffage: 0.7, source: t("ctl.src_nuit") });
-$("jour").onclick = () => envoyer({ ecrans: [0.6, 0.6, 0.6], ouvrants_deg: 35, chauffage: 0, source: t("ctl.src_jour") });
+$("nuit").onclick = () => envoyer({ ecrans: [1, 1, 1, 1], ouvrants_deg: 0, chauffage: 0.7, source: t("ctl.src_nuit") });
+$("jour").onclick = () => envoyer({ ecrans: [0.6, 0.6, 0.6, 0.6], ouvrants_deg: 35, chauffage: 0, source: t("ctl.src_jour") });
 afficher(await (await fetch(`../api/actionneurs?site=${SITE}`)).json());
 </script>
 </body>

@@ -12,3 +12,5 @@ __pycache__/
 *.blend1
 app_dev/
 _site/
+**/blender/plan_rigerie/*.blend
+**/__pycache__/

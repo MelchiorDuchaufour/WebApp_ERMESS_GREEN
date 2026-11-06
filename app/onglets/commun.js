@@ -27,7 +27,7 @@ export function geometrie({ L, W, n, h, pente }) {
   return { w, pan, hf, sol, toit, panParCote, murs, pignons, parois: murs + pignons, volume, enveloppe: toit + murs + pignons };
 }
 
-export const RIGERIE = { L: 29.5, W: 35.5, n: 3, h: 4.0, pente: 23 };   // plan_rigerie.py
+export const RIGERIE = { L: 29.5, W: 35.5, n: 4, h: 4.0, pente: 23 };   // plan_rigerie.py
 
 // Besoin de chauffage horaire sur une année météo type (PVGIS TMY).
 // p : { Utoit, Uparois, ach, tau, eta, Tjour, Tnuit, ecran (0..1 d'économie la nuit sur la toiture),

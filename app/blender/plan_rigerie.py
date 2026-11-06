@@ -11,9 +11,12 @@ Sources
     décalage perpendiculaire de 5 m (« 5 ⊥ »). Le 35,5 du mur droit part du
     mur haut, sous la bande hachurée : la bande est hors des 1020 m².
     Aire calculée 1015 m² pour 1020 m² annoncés.
-  - Tablettes des rangs 1-3 et toiture à 3 nefs (faîtages parallèles au mur
-    haut) : communiqués le 22/09/2026. Jeu entre tablettes : supposé, plus large
-    que sur le schéma p.7 (retour du 22/09), rang 1 centré.
+  - Tablettes des rangs 1-3 et faîtages parallèles au mur haut : communiqués le
+    22/09/2026. Jeu entre tablettes : supposé, plus large que sur le schéma p.7
+    (retour du 22/09), rang 1 centré.
+  - Correction du 06/11/2026 (retour de terrain) : 4 nefs et non 3, double rangée
+    (rangs 2-3) de 8 m, une rangée de poteaux au nord et une au sud de cette double
+    rangée, plus de place entre celle-ci et les rangs 4-5.
   - Réseau eau chaude / froide : photos bocage/rigerie_circu_eau/ (22/09/2026).
     Une paire chaud/froid le long du mur haut pour le rang 1 (IMG_5705, 5710),
     deux paires entre les rangs 2 et 3, une par rangée (IMG_5711, 5715, et les
@@ -54,11 +57,12 @@ BANDE_X0, BANDE_H, BANDE_X_HACH = 3.30, 2.70, 26.00
 # --- Tablettes (données 22/09/2026) ----------------------------------------------
 T_LARG = 1.80
 R1_N, R1_LONG = 13, 3.20     # rang 1, contre le mur haut
-R23_N, R23_LONG = 12, 8.80   # rangs 2 et 3, sous les 12 positions de droite
+R23_N, R23_LONG = 12, 8.00   # rangs 2 et 3, sous les 12 positions de droite (06/11 ; avant 8,80)
 
 # --- Toiture (donnée 22/09/2026) -------------------------------------------------
-N_NEFS = 3                   # triple faîtage
-FAITAGE_AXE = "x"            # faîtages parallèles au mur haut -> nefs de 35,50/3 = 11,83 m
+N_NEFS = 4                   # 4 nefs égales (06/11/2026 ; avant : 3)
+FAITAGE_AXE = "x"            # faîtages parallèles au mur haut -> nefs de 35,50/4 = 8,875 m
+                             # rangées de poteaux sous les chéneaux : y = 8,875 / 17,75 / 26,625 m
                              # ("y" = parallèles au mur droit, nefs de 9,83 m : 1re version)
 
 # --- HYPOTHÈSES (schéma p.7 ou valeur courante) --------------------------------
@@ -66,16 +70,16 @@ JEU_X = 0.40                 # entre deux tablettes voisines ; rang 1 centré, m
                              # (max 0,508 m : les marges tombent alors à 0)
 # 1re version calée sur le schéma p.7 : MARGE_G = 1.30, MARGE_D = 2.10 -> jeu 0,225 m
 RECUL_HAUT = 0.80            # mur haut -> rang 1
-COULOIR = 1.60               # couloir de passage rang 1 / rang 2 (plus large, 22/09 ; avant 1.20)
+# couloir rang 1 / rang 2 : déduit (double rangée centrée sur le chéneau du milieu, cf. niveaux())
 JEU_R2_R3 = 0.60             # passage du réseau central entre les rangs 2 et 3 (existe : 22/09)
-R45_REPARTITION = "egale"    # rangs 4-5 étalés jusqu'au mur bas, 3 espaces égaux (22/09) :
-                             # R3->R4 = R4->R5 = R5->mur bas. "fixe" = valeurs ci-dessous
-ALLEE_R3_R4 = 1.50           # (mode "fixe") avant 1.00, 1re version 0.70
+R45_REPARTITION = "fixe"     # "fixe" (06/11) : valeurs ci-dessous, rangs 4-5 regroupés au sud.
+                             # "egale" = 3 espaces égaux R3->R4 = R4->R5 = R5->mur bas (22/09)
+ALLEE_R3_R4 = 4.05           # hyp. : contient la rangée de poteaux ; laisse R5 à 1 m du point haut du mur bas
 R45_POS = 11                 # rangs 4-5 larges de ~11 positions (22/09), alignés côté galerie
 R45_N = 2                    # tablettes par rang 4 et 5, posées en long (p.7)
 R45_LARG = 1.80
 R45_JEU_X = 0.30             # entre les deux tablettes d'un même rang
-R4_R5_JEU = 0.80             # (mode "fixe") avant 0.20
+R4_R5_JEU = 0.80             # (mode "fixe") hyp., avant 0.20
 
 # --- Réseau eau chaude / froide (photos 22/09/2026) ------------------------------
 Z_TUBE_CHAUD, Z_TUBE_FROID = 1.50, 1.35   # tubes verts superposés, « à 1,5 m » (donné)
@@ -141,10 +145,11 @@ def niveaux():
     """Bords haut/bas (y) de chaque rang, et du couloir."""
     y = {}
     y["r1"] = (H_DROIT - RECUL_HAUT, H_DROIT - RECUL_HAUT - R1_LONG)
-    y["couloir"] = (y["r1"][1], y["r1"][1] - COULOIR)
-    y["r2"] = (y["couloir"][1], y["couloir"][1] - R23_LONG)
-    y["r3"] = (y["r2"][1] - JEU_R2_R3, y["r2"][1] - JEU_R2_R3 - R23_LONG)
-    y["reseau"] = (y["r2"][1] + y["r3"][0]) / 2          # axe du réseau central
+    # double rangée centrée sur la rangée de poteaux du milieu (chéneau central, réseau)
+    y["reseau"] = H_DROIT / 2
+    y["r2"] = (y["reseau"] + JEU_R2_R3 / 2 + R23_LONG, y["reseau"] + JEU_R2_R3 / 2)
+    y["r3"] = (y["reseau"] - JEU_R2_R3 / 2, y["reseau"] - JEU_R2_R3 / 2 - R23_LONG)
+    y["couloir"] = (y["r1"][1], y["r2"][0])
     if R45_REPARTITION == "egale":
         y_bas = H_DROIT - H_GAUCHE - PAN_DY          # point le plus haut du mur bas (0,5 m)
         a = b = (y["r3"][1] - y_bas - 2 * R45_LARG) / 3
@@ -241,6 +246,31 @@ def reseau(tabs):
         poteaux_centre.append((x, y["reseau"]))
         x += PAS_POTEAUX_CENTRE
     return lignes, poteaux_mur, poteaux_centre
+
+
+def poteaux_nefs(tabs=None):
+    """Rangées de poteaux sous les chéneaux, hors rangée centrale (déjà dans reseau()).
+    Même pas et mêmes x que les poteaux centraux. Lève une erreur si un poteau tombe
+    sur une tablette."""
+    tabs = tabs or tablettes()
+    _, _, centre = reseau(tabs)
+    x_ref, poly, y_c = centre[0][0], enveloppe(), niveaux()["reseau"]
+    w, out = H_DROIT / N_NEFS, []
+    for i in range(1, N_NEFS):
+        yp = i * w
+        if abs(yp - y_c) < 1e-6:
+            continue
+        a0, a1 = portee(poly, yp, "x")
+        k0 = int((x_ref - a0) // PAS_POTEAUX_CENTRE)
+        x = x_ref - k0 * PAS_POTEAUX_CENTRE
+        while x < a1 - 0.3:
+            if x > a0 + 0.3:
+                for t in tabs:
+                    if t["x0"] <= x <= t["x1"] and t["y0"] <= yp <= t["y1"]:
+                        raise ValueError(f"poteau ({x:.2f}, {yp:.2f}) sur la tablette R{t['rang']}-{t['num']}")
+                out.append((x, yp))
+            x += PAS_POTEAUX_CENTRE
+    return out
 
 
 def colonnes(li):
@@ -345,7 +375,7 @@ def construire(tabs, poly):
              (0, y["couloir"][1])], "LIMITE", fill="#f4eedd", hatch=None)
     sc.items[-1][1]["layer_mpl_only"] = True
     sc.text(LARGEUR * 0.52, (y["couloir"][0] + y["couloir"][1]) / 2 + 0.05,
-            f"couloir de passage  ({fr(COULOIR)} m)", 6.5, style="italic", color=C_HYP)
+            f"couloir de passage  ({fr(y['couloir'][0] - y['couloir'][1])} m)", 6.5, style="italic", color=C_HYP)
 
     # tablettes
     for t in tabs:
@@ -368,7 +398,7 @@ def construire(tabs, poly):
             sc.poly([(c[0] - 0.09, c[1] - 0.09), (c[0] + 0.09, c[1] - 0.09),
                      (c[0] + 0.09, c[1] + 0.09), (c[0] - 0.09, c[1] + 0.09)], lay,
                     fill=STYLE[lay]["color"])
-    for px, py in pot_mur + pot_centre:
+    for px, py in pot_mur + pot_centre + poteaux_nefs(tabs):
         sc.poly([(px - 0.06, py - 0.06), (px + 0.06, py - 0.06), (px + 0.06, py + 0.06),
                  (px - 0.06, py + 0.06)], "POTEAUX", fill=FILL["POTEAUX"])
 
@@ -567,7 +597,7 @@ def cartouche(ax, tabs, poly, x0, ytop):
     # sources
     y -= 0.9
     src = ("Enveloppe : plan de site du 12/12/2012 (29,50 · 25,50 · 35,5 ; mur du magasin\n"
-           "5,00 × 9,50). Tablettes des rangs 1 à 3 et toiture : données du 22/09/2026.\n"
+           "5,00 × 9,50). Tablettes des rangs 1 à 3 : données du 22/09/2026, longueur des rangs 2-3 et 4 nefs : 06/11/2026.\n"
            f"Jeu entre tablettes supposé ({fr(JEU_X)} m), rang 1 centré. Rangs 4-5, recul,\n"
            "couloir, allées : schéma p.7 du rapport Analyse Bocage ou valeurs courantes.\n"
            "Réseau chaud/froid : photos du 22/09/2026 (rigerie_circu_eau/), une paire par\n"

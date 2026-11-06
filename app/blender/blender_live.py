@@ -31,7 +31,7 @@ import bpy
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import plan_rigerie as pr  # noqa: E402
 
-N_NEFS = 3
+N_NEFS = pr.N_NEFS
 L_NEFS = pr.H_DROIT / N_NEFS          # faîtages parallèles à x : nefs empilées en y
 Z_ECRAN = 3.92                        # juste sous le chéneau (4,00 m)
 Y_FAITAGES = [(i + 0.5) * L_NEFS for i in range(N_NEFS)]
@@ -280,6 +280,7 @@ class EtatLive(bpy.types.PropertyGroup):
     ecran1: bpy.props.FloatProperty(update=_maj, name="Écran nef 1", min=0, max=1, default=0, subtype="FACTOR")
     ecran2: bpy.props.FloatProperty(update=_maj, name="Écran nef 2", min=0, max=1, default=0, subtype="FACTOR")
     ecran3: bpy.props.FloatProperty(update=_maj, name="Écran nef 3", min=0, max=1, default=0, subtype="FACTOR")
+    ecran4: bpy.props.FloatProperty(update=_maj, name="Écran nef 4", min=0, max=1, default=0, subtype="FACTOR")
     ouvrants: bpy.props.FloatProperty(update=_maj, name="Ouvrants (°)", min=0, max=ANGLE_MAX, default=0)
     chauffage: bpy.props.FloatProperty(update=_maj, name="Chauffage", min=0, max=1, default=0, subtype="FACTOR")
     statut: bpy.props.StringProperty(default="")
@@ -287,7 +288,7 @@ class EtatLive(bpy.types.PropertyGroup):
 
 
 def appliquer(e):
-    for i, f in enumerate((e.ecran1, e.ecran2, e.ecran3)):
+    for i, f in enumerate((e.ecran1, e.ecran2, e.ecran3, e.ecran4)):
         maj_ecran(i, f)
     maj_ouvrants(e.ouvrants)
     maj_chauffage(e.chauffage)
@@ -308,7 +309,7 @@ def rafraichir():
         try:
             act = get_json(f"{base}/api/actionneurs?site={e.site}")
             ec = act.get("ecrans", [0] * N_NEFS)
-            e.ecran1, e.ecran2, e.ecran3 = (list(ec) + [0, 0, 0])[:3]
+            e.ecran1, e.ecran2, e.ecran3, e.ecran4 = (list(ec) + [0, 0, 0, 0])[:4]
             e.ouvrants = act.get("ouvrants_deg", 0)
             e.chauffage = act.get("chauffage", 0)
             msgs.append(f"actionneurs ({act.get('source', '?')}, {act.get('maj', '?')})")
