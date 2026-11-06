@@ -544,7 +544,7 @@ def cartouche(ax, tabs, poly, x0, ytop):
         hyp = tr[0]["hyp"]
         col = C_HYP if hyp else C_DONNEE
         vals = [f"{r}", f"{len(tr)}", f"{fr(dx)} × {fr(dy)}", f"{fr(s, 1)} m²",
-                "hyp. (rapport p.7)" if hyp else "donné 22/09/2026"]
+                "hyp. (rapport p.7)" if hyp else ("donné 06/11/2026" if r in (2, 3) else "donné 22/09/2026")]
         for c, v in zip(cols, vals):
             ax.text(c, y, v, fontsize=6.3, va="top", color=col,
                     fontstyle="italic" if hyp and c == cols[-1] else "normal")
