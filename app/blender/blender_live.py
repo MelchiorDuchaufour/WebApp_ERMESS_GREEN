@@ -2,7 +2,8 @@
 blender_live.py — Serre Rigerie en direct dans Blender (première version, locale).
 
 Anime dans la maquette :
-  * les écrans thermiques (un par nef, déploiement 0 = replié, 1 = fermé),
+  * les écrans thermiques : dans chaque nef, un écran d'un poteau au suivant, rayé gris et
+    beige, déployé du poteau ouest vers l'est ; un réglage par nef (0 = ouvert, 1 = fermé ; nef 1 = sud),
   * les ouvrants de faîtage (angle d'ouverture, charnière sur le faîtage),
   * le chauffage (couleur des tubes verts chauds, 0 = arrêt, 1 = plein),
   * les capteurs Sigrow (sphères colorées par la variable choisie).
@@ -33,7 +34,8 @@ import plan_rigerie as pr  # noqa: E402
 
 N_NEFS = pr.N_NEFS
 L_NEFS = pr.H_DROIT / N_NEFS          # faîtages parallèles à x : nefs empilées en y
-Z_ECRAN = 3.92                        # juste sous le chéneau (4,00 m)
+Z_ECRAN = 3.75                        # sous le chéneau (3,80-4,00 m), hyp.
+BANDE_ECRAN = 0.50                    # largeur d'une rayure, hyp.
 Y_FAITAGES = [(i + 0.5) * L_NEFS for i in range(N_NEFS)]
 Z_FAITAGE = 4.0 + (L_NEFS / 2) * math.tan(math.radians(23.0))
 ANGLE_MAX = 45.0                      # ouverture maximale des ouvrants (°)
@@ -83,6 +85,32 @@ def materiau(nom, rgba, alpha=1.0, emission=0.0):
     return m
 
 
+def materiau_ecran():
+    """Rayures gris / beige dans le sens de l'ouverture (ouest-est), réglées par y."""
+    m = materiau("ecran_thermique", (0.72, 0.70, 0.64, 1.0), alpha=0.6)   # légèrement transparent
+    if hasattr(m, "surface_render_method"):
+        m.surface_render_method = "BLENDED"
+    nt = m.node_tree
+    if "rayures" in nt.nodes:
+        return m
+    coord, xyz = nt.nodes.new("ShaderNodeTexCoord"), nt.nodes.new("ShaderNodeSeparateXYZ")
+    echelle, frac = nt.nodes.new("ShaderNodeMath"), nt.nodes.new("ShaderNodeMath")
+    echelle.operation, frac.operation = "DIVIDE", "FRACT"
+    echelle.inputs[1].default_value = 2 * BANDE_ECRAN
+    rampe = nt.nodes.new("ShaderNodeValToRGB")
+    rampe.name = "rayures"
+    rampe.color_ramp.interpolation = "CONSTANT"
+    rampe.color_ramp.elements[0].color = lin(hex_rgb("#8f8f8b")) + (1.0,)      # gris
+    rampe.color_ramp.elements[1].position = 0.5
+    rampe.color_ramp.elements[1].color = lin(hex_rgb("#d8caa6")) + (1.0,)      # beige
+    nt.links.new(coord.outputs["Object"], xyz.inputs[0])
+    nt.links.new(xyz.outputs["Y"], echelle.inputs[0])
+    nt.links.new(echelle.outputs[0], frac.inputs[0])
+    nt.links.new(frac.outputs[0], rampe.inputs[0])
+    nt.links.new(rampe.outputs[0], nt.nodes.get("Principled BSDF").inputs["Base Color"])
+    return m
+
+
 def get_json(url, timeout=8):
     with urllib.request.urlopen(url, timeout=timeout) as r:
         return json.loads(r.read().decode())
@@ -122,7 +150,7 @@ def construire():
     poly = pr.enveloppe()
     xs = [p[0] for p in poly]
     # écrans : un objet par nef, maillage refait à chaque mise à jour
-    m_ecran = materiau("ecran_thermique", (0.93, 0.90, 0.80, 1.0), alpha=0.85)
+    m_ecran = materiau_ecran()
     for i in range(N_NEFS):
         nom = f"ecran_nef{i + 1}"
         if nom not in bpy.data.objects:
@@ -194,15 +222,25 @@ def maj_ecran(i, f):
     f = min(1.0, max(0.0, f))
     x0, x1 = ob["xlim"]
     y0 = i * L_NEFS
-    # écran tiré depuis le chéneau bas de la nef ; replié = bande de 0,15 m
-    larg = max(0.15, f * L_NEFS)
-    pts = clip_poly(pr.enveloppe(), x0, x1, y0, y0 + larg)
+    pas = (x1 - x0) / pr.N_TRAVEES
+    # un écran par travée, d'un poteau au suivant ; ouvert = replié contre le poteau ouest (0,15 m)
+    larg = max(0.15, f * pas)
     bm = bmesh.new()
-    if len(pts) >= 3:
-        bm.faces.new([bm.verts.new((x, y, Z_ECRAN)) for x, y in pts])
+    for k in range(pr.N_TRAVEES):
+        x_ouest = x0 + k * pas
+        pts = clip_poly(pr.enveloppe(), x_ouest, x_ouest + larg, y0, y0 + L_NEFS)
+        if len(pts) >= 3:
+            bm.faces.new([bm.verts.new((x, y, Z_ECRAN)) for x, y in pts])
     bm.to_mesh(ob.data)
     bm.free()
     ob.data.update()
+
+
+def maj_voisins(voir):
+    """Serres et bâtiments autour (collection Voisins, serre_contexte.py)."""
+    c = bpy.data.collections.get("Voisins")
+    if c:
+        c.hide_viewport = c.hide_render = not voir
 
 
 def maj_ouvrants(angle_deg):
@@ -267,6 +305,10 @@ def _maj(self, ctx):
         appliquer(self)
 
 
+def _maj_voisins(self, ctx):
+    maj_voisins(self.voisins)
+
+
 class EtatLive(bpy.types.PropertyGroup):
     serveur: bpy.props.StringProperty(name="Serveur", default="http://localhost:8766")
     site: bpy.props.StringProperty(name="Site", default="bocage")
@@ -283,6 +325,7 @@ class EtatLive(bpy.types.PropertyGroup):
     ecran4: bpy.props.FloatProperty(update=_maj, name="Écran nef 4", min=0, max=1, default=0, subtype="FACTOR")
     ouvrants: bpy.props.FloatProperty(update=_maj, name="Ouvrants (°)", min=0, max=ANGLE_MAX, default=0)
     chauffage: bpy.props.FloatProperty(update=_maj, name="Chauffage", min=0, max=1, default=0, subtype="FACTOR")
+    voisins: bpy.props.BoolProperty(name="Afficher les environs", default=True, update=_maj_voisins)
     statut: bpy.props.StringProperty(default="")
     actif: bpy.props.BoolProperty(default=False)
 
@@ -352,6 +395,21 @@ class SERRE_OT_appliquer(bpy.types.Operator):
         return {"FINISHED"}
 
 
+class SERRE_OT_ecrans(bpy.types.Operator):
+    """Ouvre ou ferme tous les écrans (passe en mode Manuel)"""
+    bl_idname = "serre.ecrans"
+    bl_label = "Écrans"
+    valeur: bpy.props.FloatProperty(default=0.0)
+
+    def execute(self, ctx):
+        e = ctx.scene.serre_live
+        e.mode = "MANUEL"
+        construire()
+        e.ecran1 = e.ecran2 = e.ecran3 = e.ecran4 = self.valeur
+        appliquer(e)
+        return {"FINISHED"}
+
+
 class SERRE_PT_live(bpy.types.Panel):
     bl_label = "Serre Rigerie · direct"
     bl_space_type, bl_region_type, bl_category = "VIEW_3D", "UI", "Serre live"
@@ -360,9 +418,13 @@ class SERRE_PT_live(bpy.types.Panel):
         e, l = ctx.scene.serre_live, self.layout
         l.prop(e, "serveur"); l.prop(e, "site"); l.prop(e, "variable"); l.prop(e, "periode")
         l.prop(e, "mode", expand=True)
+        l.prop(e, "voisins")
+        row = l.row(align=True)
+        row.operator("serre.ecrans", text="Tout ouvrir").valeur = 0.0
+        row.operator("serre.ecrans", text="Tout fermer").valeur = 1.0
         col = l.column(align=True)
         col.enabled = e.mode == "MANUEL"
-        for k in ("ecran1", "ecran2", "ecran3", "ouvrants", "chauffage"):
+        for k in ("ecran1", "ecran2", "ecran3", "ecran4", "ouvrants", "chauffage"):
             col.prop(e, k)
         if e.mode == "MANUEL":
             l.operator("serre.appliquer")
@@ -373,7 +435,7 @@ class SERRE_PT_live(bpy.types.Panel):
             l.label(text=ligne)
 
 
-CLASSES = (EtatLive, SERRE_OT_demarrer, SERRE_OT_arreter, SERRE_OT_appliquer, SERRE_PT_live)
+CLASSES = (EtatLive, SERRE_OT_demarrer, SERRE_OT_arreter, SERRE_OT_appliquer, SERRE_OT_ecrans, SERRE_PT_live)
 
 
 def register():

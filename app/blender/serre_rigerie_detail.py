@@ -44,7 +44,7 @@ N_NEFS, FAITAGE_AXE = pr.N_NEFS, pr.FAITAGE_AXE          # nefs (plan_rigerie.py
 
 # --- HYPOTHÈSES de la structure fine --------------------------------------------
 N_VITRES_TRAVEE = 7          # vitres comptées entre 2 poteaux de façade (IMG_5710)
-PAS_FERME = pr.PAS_POTEAUX_MUR                  # 3,20 m : 1 ferme par travée
+PAS_FERME = pr.PAS_POTEAUX_MUR                  # ≈ 3,28 m : 1 ferme par travée
 PAS_VITRE = PAS_FERME / N_VITRES_TRAVEE         # ≈ 0,457 m
 PAS_RECOUV = 0.80            # pas des recouvrements horizontaux sur les pans
 Z_TRAVERSE = 2.20            # traverse horizontale des façades

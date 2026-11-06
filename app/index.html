@@ -80,13 +80,24 @@ h2{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--mute
 #site{font:inherit;width:100%;padding:6px 8px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--ink);margin-bottom:4px}
 .partenaires{margin-top:22px;padding-top:12px;border-top:1px solid var(--line)}
 .partenaires #partenaires{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;align-items:center}
-.partenaires img{height:52px;width:100%;object-fit:contain;background:#fff;border-radius:6px;padding:5px 8px;display:block;
+.partenaires img{box-sizing:border-box;height:62px;width:100%;object-fit:contain;background:#fff;border-radius:6px;display:block;
+  padding:calc((62px - 50px * var(--e)) / 2) 6px;
   transition:transform .15s ease,box-shadow .15s ease}
 .partenaires a:hover img{transform:translateY(-2px);box-shadow:0 3px 10px rgba(0,0,0,.18)}
 .entete a img{transition:transform .15s ease} .entete a:hover img{transform:scale(1.06)}
 #langue{display:flex;gap:2px;margin-left:auto;align-self:flex-start;border:1px solid var(--line);border-radius:8px;padding:2px}
 #langue button{font:600 11px/1 system-ui,sans-serif;border:0;background:transparent;color:var(--muted);padding:5px 7px;border-radius:6px;cursor:pointer}
 #langue button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+#panneau-ecrans{position:absolute;right:12px;bottom:12px;z-index:5;width:224px;background:var(--panel);border:1px solid var(--line);
+  border-radius:8px;padding:8px 10px;font-size:12px}
+#panneau-ecrans[hidden]{display:none}
+#panneau-ecrans label.voir{display:flex;gap:6px;align-items:center;font-weight:600;margin-bottom:6px}
+#panneau-ecrans .boutons{display:flex;gap:6px;margin-bottom:6px}
+#panneau-ecrans .boutons button{flex:1;font:inherit;padding:4px 6px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+#panneau-ecrans .nef{display:grid;grid-template-columns:82px 1fr 34px;gap:6px;align-items:center;margin:3px 0}
+#panneau-ecrans .nef input{width:100%;min-width:0;margin:0}
+#panneau-ecrans output{text-align:right;font-variant-numeric:tabular-nums}
+#panneau-ecrans .legende-ecrans{color:var(--muted);font-size:11px;margin-top:4px}
 .forme{display:inline-block;width:12px;text-align:center;font-size:11px;color:var(--muted)}
 /* --- barre d'onglets latérale --- */
 #rail{position:fixed;left:0;top:0;bottom:0;width:86px;z-index:20;background:var(--panel);border-right:1px solid var(--line);
@@ -111,6 +122,7 @@ h2{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--mute
   #app{grid-template-columns:1fr;grid-template-rows:60vh auto;height:auto}
   aside{border-left:0;border-top:1px solid var(--line);padding:16px}
   #legende{min-width:0;right:12px}
+  #panneau-ecrans{top:100px;bottom:auto;left:12px;right:auto}
 }
 </style>
 </head>
@@ -148,9 +160,18 @@ h2{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--mute
       </select>
       <button id="b-toit" aria-pressed="true" data-i18n="serre.toit">Toit et vitrage</button>
       <button id="b-dessus" aria-pressed="false" data-i18n="serre.dessus">Vue de dessus</button>
+      <button id="b-ecrans" aria-pressed="true" aria-controls="panneau-ecrans" data-i18n="serre.ecrans">Écrans</button>
+      <button id="b-voisins" aria-pressed="true" data-i18n="serre.voisins">Environs</button>
       <button id="b-edit" aria-pressed="false" data-i18n="serre.placer">Placer les capteurs</button>
     </div>
     <div id="bandeau"></div>
+    <div id="panneau-ecrans">
+      <label class="voir"><input type="checkbox" id="ecrans-voir" checked><span data-i18n="ecr.afficher">Afficher les écrans</span></label>
+      <div class="boutons"><button id="ecrans-ouvrir" data-i18n="ecr.ouvrir">Tout ouvrir</button><button id="ecrans-fermer" data-i18n="ecr.fermer">Tout fermer</button></div>
+      <div id="ecrans-nefs"></div>
+      <div class="legende-ecrans" data-i18n="ecr.legende">0 % ouvert · 100 % fermé</div>
+      <div class="legende-ecrans" id="ecrans-indice"></div>
+    </div>
     <div id="legende">
       <div id="leg-titre">T° air (°C)</div>
       <div class="rampe" id="leg-rampe"></div>
@@ -244,18 +265,22 @@ scene.add(new THREE.HemisphereLight(0xffffff, 0x8a8f7a, 1.6));
 const soleil = new THREE.DirectionalLight(0xffffff, 1.4); soleil.position.set(30, 50, 20); scene.add(soleil);
 
 const masquables = [];   // toit, vitrage, fermes
+const voisins = []; let VOISINS_VISIBLES = true;   // serres et bâtiments environnants
 let cliquables = [];     // surfaces sur lesquelles on pose un capteur
-let MODELE = null, centre = new THREE.Vector3(14.75, 1, -17.75), VUE_DEF = new THREE.Vector3(48, 30, 14);
+let MODELE = null, centre = new THREE.Vector3(14.75, 1, -17.75), VUE_DEF = new THREE.Vector3(38, 46, 34);
 const loader = new GLTFLoader();
 function chargerDecor(st) {
   if (MODELE) { scene.remove(MODELE); MODELE = null; }
-  masquables.length = 0; cliquables = [];
+  masquables.length = 0; cliquables = []; voisins.length = 0;
   if (st.modele) {
-    centre.set(14.75, 1, -17.75); VUE_DEF.set(48, 30, 14);
+    centre.set(14.75, 1, -17.75); VUE_DEF.set(38, 46, 34);
     loader.load("modele/" + st.modele, g => {
       g.scene.traverse(o => {
         if (!o.isMesh) return;
         const n = o.name || "";
+        if (/^voisin/.test(n)) {                  // environs : ni transparents, ni surface de pose
+          voisins.push(o); o.visible = VOISINS_VISIBLES; return;
+        }
         if (/verre/i.test(n) || /verre/i.test(o.material?.name || "")) {
           o.material = new THREE.MeshStandardMaterial({ color: 0xcfe6f2, transparent: true, opacity: 0.12,
             depthWrite: false, side: THREE.DoubleSide });
@@ -485,16 +510,135 @@ document.getElementById("b-dessus").onclick = e => {
 };
 function bandeau(t) { const b = document.getElementById("bandeau"); b.textContent = t; b.style.display = t ? "block" : "none"; }
 
+// ---------- écrans thermiques : un par travée dans chaque nef, déployé du poteau ouest vers l'est ----------
+let ACT = null, ECRANS_VISIBLES = true;
+const groupeEcrans = new THREE.Mesh(new THREE.BufferGeometry(), new THREE.MeshStandardMaterial({
+  side: THREE.DoubleSide, transparent: true, opacity: 0.6, depthWrite: false, roughness: 0.9,
+  map: (() => {                                     // rayures gris / beige
+    const c = Object.assign(document.createElement("canvas"), { width: 2, height: 2 }), x = c.getContext("2d");
+    x.fillStyle = "#8f8f8b"; x.fillRect(0, 0, 2, 1); x.fillStyle = "#d8caa6"; x.fillRect(0, 1, 2, 1);
+    const tex = new THREE.CanvasTexture(c);
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.magFilter = tex.minFilter = THREE.NearestFilter;
+    tex.generateMipmaps = false; tex.colorSpace = THREE.SRGBColorSpace; return tex;
+  })(),
+}));
+groupeEcrans.frustumCulled = false;                // géométrie refaite à chaque mise à jour
+scene.add(groupeEcrans);
+function decouper(poly, x0, x1, y0, y1) {           // polygone ∩ rectangle (Sutherland-Hodgman)
+  const bords = [[p => p[0] >= x0, (a, b) => [x0, a[1] + (b[1] - a[1]) * (x0 - a[0]) / (b[0] - a[0])]],
+                 [p => p[0] <= x1, (a, b) => [x1, a[1] + (b[1] - a[1]) * (x1 - a[0]) / (b[0] - a[0])]],
+                 [p => p[1] >= y0, (a, b) => [a[0] + (b[0] - a[0]) * (y0 - a[1]) / (b[1] - a[1]), y0]],
+                 [p => p[1] <= y1, (a, b) => [a[0] + (b[0] - a[0]) * (y1 - a[1]) / (b[1] - a[1]), y1]]];
+  let pts = poly;
+  for (const [dedans, inter] of bords) pts = pts.flatMap((p, i) => {
+    const q = pts.at(i - 1), out = [];
+    if (dedans(p)) { if (!dedans(q)) out.push(inter(q, p)); out.push(p); } else if (dedans(q)) out.push(inter(q, p));
+    return out;
+  });
+  return pts;
+}
+function majEcrans() {
+  const cfg = SITES[SITE]?.ecrans, pos = [], uv = [];
+  if (cfg && ECRANS_VISIBLES && ACT) {
+    const xs = cfg.enveloppe.map(p => p[0]), ys = cfg.enveloppe.map(p => p[1]);
+    const x0 = Math.min(...xs), pas = (Math.max(...xs) - x0) / cfg.travees, w = Math.max(...ys) / cfg.nefs;
+    for (let i = 0; i < cfg.nefs; i++) {
+      const larg = Math.max(0.15, Math.min(1, ACT.ecrans?.[i] ?? 0) * pas);
+      for (let k = 0; k < cfg.travees; k++) {
+        const xO = x0 + k * pas, pts = decouper(cfg.enveloppe, xO, xO + larg, i * w, (i + 1) * w);
+        for (let j = 1; j < pts.length - 1; j++) for (const p of [pts[0], pts[j], pts[j + 1]]) {
+          const v = versScene({ x: p[0], y: p[1], z: cfg.z });
+          pos.push(v.x, v.y, v.z); uv.push(0, p[1] / (2 * cfg.bande));
+        }
+      }
+    }
+  }
+  const g = groupeEcrans.geometry;
+  g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute("uv", new THREE.Float32BufferAttribute(uv, 2));
+  g.deleteAttribute("normal");                      // sinon three réutilise l'ancien tableau, de mauvaise taille
+  g.computeVertexNormals();
+  const bouton = document.getElementById("b-ecrans");
+  bouton.style.display = cfg ? "" : "none";
+  if (!cfg) document.getElementById("panneau-ecrans").hidden = true;
+  else majPanneau(cfg);
+}
+// Panneau : ouvrir / fermer. En local, l'état est enregistré (Contrôle et Blender le reprennent) ;
+// en version publique, il ne change que l'affichage du visiteur.
+let PANNEAU_SITE = null, ECRANS_TOUCHES = false;
+const fermetures = cfg => Array.from({ length: cfg.nefs }, (_, i) => ACT?.ecrans?.[i] ?? 0);
+function majPanneau(cfg) {
+  const boite = document.getElementById("ecrans-nefs");
+  if (PANNEAU_SITE !== SITE) {
+    PANNEAU_SITE = SITE; boite.replaceChildren();
+    for (let i = cfg.nefs - 1; i >= 0; i--) {
+      const ligne = document.createElement("div"); ligne.className = "nef";
+      const repere = i === 0 ? ` (${t("ctl.sud")})` : i === cfg.nefs - 1 ? ` (${t("ctl.nord")})` : "";
+      const nom = document.createElement("span"); nom.textContent = t("ctl.nef", { n: i + 1 }) + repere;
+      const r = Object.assign(document.createElement("input"), { type: "range", min: 0, max: 100, step: 5, id: `ecran-v${i}` });
+      r.setAttribute("aria-label", nom.textContent);
+      const o = document.createElement("output"); o.id = `ecran-o${i}`;
+      r.oninput = () => regler(cfg, i, +r.value / 100, false);
+      r.onchange = () => regler(cfg, i, +r.value / 100, true);
+      ligne.append(nom, r, o); boite.append(ligne);
+    }
+  }
+  majIndice(cfg);
+  fermetures(cfg).forEach((f, i) => {
+    const r = document.getElementById(`ecran-v${i}`), pc = Math.round(f * 100);
+    if (document.activeElement !== r) r.value = pc;
+    document.getElementById(`ecran-o${i}`).textContent = pc + " %";
+  });
+}
+// Mesures brutes de part et d'autre des écrans (capteur au-dessus / capteur en dessous) ; pas de verdict
+// tant que les seuils ne sont pas calés sur plusieurs jours d'ouvertures connues.
+function majIndice(cfg) {
+  const el = document.getElementById("ecrans-indice"), c = cfg.comparaison;
+  const h = c && LAT.remotes[c.haut], b = c && LAT.remotes[c.bas];
+  if (!h || !b || ageMin(c.haut) > VIEUX_MIN || ageMin(c.bas) > VIEUX_MIN) { el.textContent = ""; return; }
+  const num = (v, d) => v.toLocaleString(LOCALE, { minimumFractionDigits: d, maximumFractionDigits: d });
+  const pH = h.values.par, pB = b.values.par, tH = h.values.temp, tB = b.values.temp;
+  el.textContent = t("ecr.indice", { n: c.nef, h: c.haut, b: c.bas, ph: num(pH, 0), pb: num(pB, 0), dt: (tH - tB >= 0 ? "+" : "") + num(tH - tB, 1) });
+}
+function appliquerFermetures(vals, sauver) {
+  ECRANS_TOUCHES = true;
+  ACT = { ...(ACT || {}), ecrans: vals }; majEcrans();
+  if (!sauver || window.ERMESS_STATIQUE) return;
+  fetch(api("api/actionneurs"), { method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ...ACT, source: t("ecr.source") }) })
+    .then(r => { if (!r.ok) throw new Error(r.status); })
+    .catch(e => bandeau(t("commun.echec", { msg: e.message })));
+}
+function regler(cfg, i, f, sauver) { const v = fermetures(cfg); v[i] = f; appliquerFermetures(v, sauver); }
+function toutRegler(f) {
+  const cfg = SITES[SITE]?.ecrans; if (!cfg) return;
+  document.activeElement?.blur?.();
+  appliquerFermetures(Array(cfg.nefs).fill(f), true);
+}
+document.getElementById("ecrans-ouvrir").onclick = () => toutRegler(0);
+document.getElementById("ecrans-fermer").onclick = () => toutRegler(1);
+document.getElementById("ecrans-voir").onchange = e => { ECRANS_VISIBLES = e.target.checked; majEcrans(); };
+document.getElementById("b-ecrans").onclick = e => {
+  const p = document.getElementById("panneau-ecrans"); p.hidden = !p.hidden;
+  e.target.setAttribute("aria-pressed", !p.hidden);
+};
+document.getElementById("b-voisins").onclick = e => {
+  VOISINS_VISIBLES = e.target.getAttribute("aria-pressed") !== "true";
+  e.target.setAttribute("aria-pressed", VOISINS_VISIBLES); voisins.forEach(o => o.visible = VOISINS_VISIBLES);
+};
+
 // ---------- données ----------
 async function rafraichir() {
   try {
-    const [p, l] = await Promise.all([
+    const [p, l, a] = await Promise.all([
       EDIT ? Promise.resolve(null) : fetch(api("api/capteurs")).then(r => r.json()),
       fetch(api("api/latest")).then(r => r.json()),
+      fetch(api("api/actionneurs")).then(r => r.json()).catch(() => null),
     ]);
     if (l.error) throw new Error(l.error);
     if (l.site !== SITE) return;          // réponse d'un site quitté entre-temps
-    if (p) POS = p; LAT = l;
+    if (p) POS = p; LAT = l; if (a && !a.error && !(window.ERMESS_STATIQUE && ECRANS_TOUCHES)) ACT = a;
+    majEcrans();
     majOptions();
     const n = Object.keys(POS.capteurs).length, off = Object.keys(POS.capteurs).filter(r => ageMin(r) > VIEUX_MIN).length;
     document.getElementById("statut").textContent =
@@ -517,7 +661,7 @@ function changerSite(sid) {
   try { localStorage.setItem("bocage3d.site", sid); } catch {}
   history.replaceState(null, "", "#" + sid);
   for (const rid of Object.keys(marqueurs)) { scene.remove(marqueurs[rid].mesh, marqueurs[rid].tige); marqueurs[rid].div.remove(); delete marqueurs[rid]; }
-  POS = { capteurs: {} }; LAT = { remotes: {} };
+  POS = { capteurs: {} }; LAT = { remotes: {} }; ACT = null; ECRANS_TOUCHES = false; majEcrans();
   document.getElementById("detail").innerHTML = `<div class="aide">${t("serre.clique")}</div>`;
   document.getElementById("liste").innerHTML = ""; document.getElementById("statut").textContent = t("serre.chargement");
   chargerDecor(SITES[sid]); rafraichir();
@@ -528,6 +672,8 @@ function ouvrirOnglet(o) {
   if (!btn || btn.hidden) o = "suivi";   // onglet en veille (ex. pv) : retour au suivi
   document.querySelectorAll("#rail button").forEach(b => b.setAttribute("aria-selected", b.dataset.onglet === o));
   const cadre = document.getElementById("cadre"), ifr = document.getElementById("cadre-if");
+  if (o === "controle") ifr.dataset.url = "";              // recharge l'état, modifiable depuis la vue 3D
+  if (o === "suivi" && ONGLET !== "suivi") rafraichir();   // état des écrans modifié dans l'onglet Contrôle
   ONGLET = o;
   labels.domElement.style.display = o === "suivi" ? "" : "none";   // sinon les étiquettes 3D débordent
   if (o === "suivi") { cadre.style.display = "none"; }

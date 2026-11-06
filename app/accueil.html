@@ -56,32 +56,33 @@ html,body{margin:0;height:100%;overflow:hidden;color:var(--ink);
 .fiche .v{font-variant-numeric:tabular-nums;font-size:12px;margin-top:3px}
 .fiche .drapeau{display:inline-block;font-size:10px;font-weight:700;color:#fff;border-radius:3px;padding:0 4px;margin-right:4px}
 .fiche .conf{color:#b5651d;font-size:11px}
-#aide{position:fixed;left:50%;bottom:92px;transform:translateX(-50%);z-index:5;color:var(--muted);font-size:12px;
+#aide{position:fixed;left:50%;bottom:108px;transform:translateX(-50%);z-index:5;color:var(--muted);font-size:12px;
   background:color-mix(in srgb,var(--carte) 80%,transparent);padding:4px 10px;border-radius:12px}
-#partenaires{position:fixed;left:0;right:0;bottom:0;z-index:5;display:flex;gap:28px;justify-content:center;align-items:center;
-  flex-wrap:wrap;padding:14px 24px;background:color-mix(in srgb,var(--carte) 88%,transparent);border-top:1px solid var(--line)}
-#partenaires img{height:50px;max-width:170px;object-fit:contain;background:#fff;border-radius:6px;padding:4px 8px;display:block;
+#partenaires{--tuile:72px;--logo:58px;position:fixed;left:0;right:0;bottom:0;z-index:5;display:flex;gap:24px;justify-content:center;align-items:center;
+  flex-wrap:wrap;padding:10px 24px;background:color-mix(in srgb,var(--carte) 88%,transparent);border-top:1px solid var(--line)}
+#partenaires img{box-sizing:border-box;height:var(--tuile);object-fit:contain;background:#fff;border-radius:6px;display:block;
+  padding:calc((var(--tuile) - var(--logo) * var(--e)) / 2) 12px;
   transition:transform .15s ease,box-shadow .15s ease}
 #partenaires a:hover img{transform:translateY(-2px) scale(1.05);box-shadow:0 3px 10px rgba(0,0,0,.18)}
 #langue{position:fixed;top:16px;right:18px;z-index:6;display:flex;gap:2px;background:color-mix(in srgb,var(--carte) 85%,transparent);
   border:1px solid var(--line);border-radius:8px;padding:2px}
 #langue button{font:600 12px/1 system-ui,sans-serif;border:0;background:transparent;color:var(--muted);padding:6px 9px;border-radius:6px;cursor:pointer}
 #langue button[aria-pressed="true"]{background:var(--accent);color:#fff}
-#source{position:fixed;right:10px;bottom:84px;z-index:5;font-size:10px;color:var(--muted)}
+#source{position:fixed;right:10px;bottom:100px;z-index:5;font-size:10px;color:var(--muted)}
 @media (pointer:coarse){ .fiche{pointer-events:auto;cursor:pointer} }
+@media (max-width:1040px){ #partenaires{--tuile:56px;--logo:46px;gap:12px;padding:8px 12px} #partenaires img{padding-inline:8px} }
 @media (max-width:720px){
   #logo img{height:64px}
   #titre{top:104px;width:calc(100% - 24px)}
   #titre h1{font-size:16px}
   #titre p{font-size:11px}
-  #partenaires{gap:6px;padding:6px 8px;flex-wrap:nowrap;justify-content:space-between}
-  #partenaires > *{flex:0 1 auto;min-width:0}
-  #partenaires img{height:26px;max-width:100%;padding:2px 3px}
-  #source{left:8px;right:8px;bottom:136px;text-align:center;font-size:9px}
+  #partenaires{--tuile:44px;--logo:36px;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:6px 8px}
+  #partenaires img{width:100%;padding-inline:4px}
+  #source{left:8px;right:8px;bottom:204px;text-align:center;font-size:9px}
   .fiche{min-width:0;max-width:150px;padding:5px 8px;margin-top:-52px}
   .fiche b{font-size:12px} .fiche .l + .l{display:none} .fiche .v{font-size:11px}
   .ville{font-size:10px}
-  #aide{bottom:94px;width:calc(100% - 24px);text-align:center;font-size:11px;padding:3px 8px}
+  #aide{bottom:162px;width:calc(100% - 24px);text-align:center;font-size:11px;padding:3px 8px}
 }
 </style>
 </head>

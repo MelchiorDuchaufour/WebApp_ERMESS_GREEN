@@ -14,16 +14,17 @@
 }
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-main{max-width:1180px;margin:0 auto;padding:22px 24px 40px}
+main{padding:22px clamp(16px,2.5vw,48px) 32px}
 header.onglet{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px 16px;margin-bottom:4px}
 header.onglet h1{font-size:20px;margin:0}
 .badge{font-size:11px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;color:var(--warn);
   border:1px solid currentColor;border-radius:10px;padding:1px 8px}
-.chapo{color:var(--muted);margin:2px 0 18px;max-width:860px}
-.grille{display:grid;grid-template-columns:330px 1fr;gap:18px;align-items:start}
+.chapo{color:var(--muted);margin:2px 0 18px;max-width:120ch}
+.grille{display:grid;grid-template-columns:clamp(330px,24vw,460px) minmax(0,1fr);gap:18px;align-items:start}
 .carte{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
 .carte h2{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:0 0 10px}
 .carte + .carte{margin-top:14px}
+.grille > .carte{margin-top:0}
 label.champ{display:grid;grid-template-columns:1fr 118px;gap:8px;align-items:center;margin:6px 0;font-size:13px}
 label.champ small{display:block;color:var(--muted);font-size:11px}
 input,select{font:inherit;width:100%;padding:5px 7px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
@@ -35,7 +36,7 @@ button.second{background:transparent;color:var(--accent)}
 .tuile .v{font-size:24px;font-weight:650;font-variant-numeric:tabular-nums;line-height:1.15}
 .tuile .u{font-size:13px;font-weight:500;color:var(--muted);margin-left:3px}
 .tuile .l{font-size:12px;color:var(--muted)}
-.graphe{height:300px}
+.graphe{height:clamp(300px,56vh,760px)}
 .note{font-size:12px;color:var(--muted);margin-top:8px}
 .etat{font-size:12px;color:var(--muted);margin-top:8px;min-height:1.2em}
 .etat.erreur{color:var(--warn)}
@@ -44,4 +45,12 @@ table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font
 th,td{padding:4px 6px;border-bottom:1px solid var(--line);text-align:right}
 th:first-child,td:first-child{text-align:left}
 th{color:var(--muted);font-weight:600}
-@media (max-width:860px){ .grille{grid-template-columns:1fr} main{padding:16px} }
+@media (max-width:860px){ .grille{grid-template-columns:minmax(0,1fr)} main{padding:16px} }
+@media (min-width:1500px){
+  html,body{font-size:15px}
+  header.onglet h1{font-size:23px}
+  .carte h2{font-size:13px}
+  label.champ,main .curseur,main .scen{font-size:14px}
+  label.champ small,main .scen small,.tuile .l,.note,.etat{font-size:13px}
+  .tuile .v{font-size:30px} .tuile .u{font-size:15px}
+}

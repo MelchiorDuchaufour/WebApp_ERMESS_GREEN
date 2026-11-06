@@ -105,6 +105,7 @@ python3 plan_rigerie.py
 cp plan_rigerie/tablettes_rigerie.csv ../donnees/
 blender -b --factory-startup --python serre_rigerie_blender.py
 blender -b plan_rigerie/serre_rigerie.blend --python serre_rigerie_detail.py
+blender -b serre_rigerie_detail.blend --python serre_contexte.py   # environs (essai, relevés sur vue aérienne)
 blender -b serre_rigerie_detail.blend --python export_glb.py
 ```
 

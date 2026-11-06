@@ -9,6 +9,7 @@
 .curseur{display:grid;grid-template-columns:130px 1fr 54px;gap:10px;align-items:center;margin:10px 0;font-size:13px}
 .curseur output{font-variant-numeric:tabular-nums;text-align:right;font-weight:600}
 svg text{font:11px system-ui,sans-serif;fill:var(--muted)}
+#coupe,#plan{display:block;max-height:34vh}
 </style>
 </head>
 <body>
@@ -34,6 +35,8 @@ svg text{font:11px system-ui,sans-serif;fill:var(--muted)}
     <div class="carte">
       <h2 data-i18n="ctl.coupe">Coupe transversale (4 nefs)</h2>
       <svg id="coupe" viewBox="0 0 720 260" width="100%" role="img" aria-label="Coupe de la serre avec écrans et ouvrants" data-i18n-aria="ctl.coupe_aria"></svg>
+      <h2 style="margin-top:16px" data-i18n="ctl.plan">Écrans, vue de dessus</h2>
+      <svg id="plan" viewBox="0 0 720 230" width="100%" role="img" data-i18n-aria="ctl.plan"></svg>
       <div class="note" id="maj"></div>
     </div>
   </div>
@@ -41,7 +44,8 @@ svg text{font:11px system-ui,sans-serif;fill:var(--muted)}
 <script type="module">
 import { t, appliquer } from "./i18n.js";
 appliquer();
-document.querySelectorAll(".i-ecran").forEach(e => e.textContent = t("ctl.ecran", { n: e.dataset.n }));
+document.querySelectorAll(".i-ecran").forEach(e => e.textContent = t("ctl.ecran", { n: e.dataset.n })
+  + ({ 1: ` (${t("ctl.sud")})`, 4: ` (${t("ctl.nord")})` }[e.dataset.n] || ""));
 const $ = id => document.getElementById(id);
 const SITE = new URLSearchParams(location.search).get("site") || "bocage";
 const etatCourant = () => ({ ecrans: [0, 1, 2, 3].map(i => +$("e" + i).value / 100), ouvrants_deg: +$("ouv").value,
@@ -71,13 +75,25 @@ function dessiner() {
     const ang = a.ouvrants_deg * Math.PI / 180, lg = 36, pente = Math.atan2(ch - fa, nef / 2);
     const ex = xm + lg * Math.cos(pente - ang), ey = fa + lg * Math.sin(pente - ang);
     s += `<line x1="${xm}" y1="${fa}" x2="${ex}" y2="${ey}" stroke="${c("--accent")}" stroke-width="4" stroke-linecap="round"/>`;
-    // écran : tiré depuis le chéneau gauche
-    const f = a.ecrans[i], larg = Math.max(4, f * nef);
-    s += `<line x1="${xa}" y1="${ch + 6}" x2="${xa + larg}" y2="${ch + 6}" stroke="${c("--warn")}" stroke-width="5" stroke-linecap="round"/>`;
+    const f = a.ecrans[i];
     s += `<text x="${xm}" y="${sol + 18}" text-anchor="middle">${t("ctl.svg_nef", { i: i + 1, n: Math.round(f * 100) })}</text>`;
   }
   s += `<text x="${W - x0}" y="${fa - 10}" text-anchor="end">${t("ctl.svg_ouv", { n: a.ouvrants_deg })}</text>`;
   $("coupe").innerHTML = s;
+  // plan : nef 4 (nord) en haut, chaque écran déployé depuis son poteau ouest
+  const T = 9, x1p = 60, bw = (W - 2 * x1p) / T, hn = 46;
+  let pl = `<defs><pattern id="rayures" width="8" height="8" patternUnits="userSpaceOnUse"><rect width="8" height="4" fill="#8f8f8b"/><rect y="4" width="8" height="4" fill="#d8caa6"/></pattern></defs>`;
+  for (let i = 0; i < 4; i++) {
+    const y0 = 12 + (3 - i) * (hn + 6), f = a.ecrans[i];
+    pl += `<text x="${x1p - 8}" y="${y0 + hn / 2 + 4}" text-anchor="end">${t("ctl.nef", { n: i + 1 })}</text>`;
+    for (let k = 0; k < T; k++) {
+      const xb = x1p + k * bw, l = Math.max(2, f * bw);
+      pl += `<rect x="${xb}" y="${y0}" width="${bw}" height="${hn}" fill="none" stroke="${c("--line")}"/>`;
+      pl += `<rect x="${xb}" y="${y0}" width="${l}" height="${hn}" fill="url(#rayures)"/>`;
+    }
+  }
+  pl += `<text x="${x1p}" y="226">${t("ctl.ouest")}</text><text x="${W - x1p}" y="226" text-anchor="end">${t("ctl.est")}</text>`;
+  $("plan").innerHTML = pl;
 }
 document.querySelectorAll("input[type=range]").forEach(r => r.oninput = () => { sorties(); dessiner(); });
 async function envoyer(a = etatCourant()) {

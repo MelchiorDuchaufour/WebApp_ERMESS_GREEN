@@ -3,111 +3,111 @@
   "note": "Positions ajustées à la main (06/11), puis décalées avec leurs bancs lors du passage à 4 nefs.",
   "capteurs": {
     "1391": {
-      "x": 25.24,
-      "y": 31.77,
+      "x": 23.59,
+      "y": 31.4,
       "z": 2.8,
       "label": "SoilPro+ 1391 · R1",
       "a_valider": false
     },
     "3678": {
-      "x": 15.54,
+      "x": 14.64,
       "y": 18.42,
       "z": 2.8,
       "label": "SoilPro+ 3678 · R2",
       "a_valider": false
     },
     "7467": {
-      "x": 15.76,
+      "x": 14.82,
       "y": 10.58,
       "z": 1.7,
       "label": "Air+ 7467 · R3",
       "a_valider": false
     },
     "14290": {
-      "x": 15.76,
-      "y": 34.4,
+      "x": 14.82,
+      "y": 34.36,
       "z": 1.0,
       "label": "Pixel+ 14290 · R1",
       "a_valider": false
     },
     "14481": {
-      "x": 7.48,
+      "x": 7.03,
       "y": 18.59,
       "z": 1.0,
       "label": "Pixel+ 14481 · R2",
       "a_valider": false
     },
     "24094": {
-      "x": 25.28,
-      "y": 31.9,
+      "x": 23.63,
+      "y": 31.55,
       "z": 1.0,
       "label": "Pixel+ 24094 · R1",
       "a_valider": false
     },
     "28271": {
-      "x": 15.53,
+      "x": 14.63,
       "y": 18.52,
       "z": 1.0,
       "label": "Pixel+ 28271 · R2",
       "a_valider": false
     },
     "31175": {
-      "x": 15.64,
-      "y": 34.28,
+      "x": 14.74,
+      "y": 34.23,
       "z": 2.8,
       "label": "Air+ 31175 · R1",
       "a_valider": false
     },
     "33232": {
-      "x": 7.0,
-      "y": 31.78,
+      "x": 6.64,
+      "y": 31.41,
       "z": 1.1,
       "label": "Pixel+ 33232 · R1",
       "a_valider": false
     },
     "34631": {
-      "x": 15.61,
+      "x": 14.71,
       "y": 23.6,
       "z": 4.2,
       "label": "Air+ 34631 · R2",
       "a_valider": false
     },
     "35301": {
-      "x": 7.09,
+      "x": 6.7,
       "y": 0.52,
       "z": 1.6,
       "label": "Air+ 35301 · R5",
       "a_valider": false
     },
     "37510": {
-      "x": 15.79,
-      "y": 31.84,
+      "x": 14.84,
+      "y": 31.48,
       "z": 2.8,
       "label": "SoilPro+ 37510 · R1",
       "a_valider": false
     },
     "47884": {
-      "x": 23.5,
+      "x": 22.0,
       "y": 18.19,
       "z": 1.0,
       "label": "SoilPro+ 47884 · R2",
       "a_valider": false
     },
     "54824": {
-      "x": 26.49,
+      "x": 24.84,
       "y": 0.34,
       "z": 2.2,
       "label": "AirPro+ 54824 · R5",
       "a_valider": false
     },
     "59525": {
-      "x": 15.75,
-      "y": 31.76,
+      "x": 14.81,
+      "y": 31.39,
       "z": 1.0,
       "label": "AirPro+ 59525 · R1",
       "a_valider": false
     }
   },
   "note_15353": "Capteurs du central 15353 placés par placer_selon_plan.py d'après « Plan Sigrow.png ». Attribution des identifiants à un symbole arbitraire (par type, ordre de lecture) : à valider.",
-  "maj": "2026-11-06 11:00"
+  "maj": "2026-11-06 12:00"
 }

@@ -35,7 +35,40 @@
         "filtre": "Bocage",
         "note": "Sondes Agrithermic (central PHENIX) retirées de l'affichage le 2026-11-06"
       }
-    ]
+    ],
+    "ecrans": {
+      "nefs": 4,
+      "travees": 9,
+      "z": 3.75,
+      "bande": 0.5,
+      "enveloppe": [
+        [
+          0,
+          35.5
+        ],
+        [
+          29.5,
+          35.5
+        ],
+        [
+          29.5,
+          0
+        ],
+        [
+          5.0,
+          0.5
+        ],
+        [
+          0,
+          10.0
+        ]
+      ],
+      "comparaison": {
+        "nef": 3,
+        "haut": "34631",
+        "bas": "28271"
+      }
+    }
   },
   "savona": {
     "nom": "Site pilote de Savona",

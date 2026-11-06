@@ -56,7 +56,7 @@ BANDE_X0, BANDE_H, BANDE_X_HACH = 3.30, 2.70, 26.00
 
 # --- Tablettes (données 22/09/2026) ----------------------------------------------
 T_LARG = 1.80
-R1_N, R1_LONG = 13, 3.20     # rang 1, contre le mur haut
+R1_N, R1_LONG = 13, 3.60     # rang 1, contre le mur haut (06/11 « un peu plus long » : hyp., avant 3,20)
 R23_N, R23_LONG = 12, 8.00   # rangs 2 et 3, sous les 12 positions de droite (06/11 ; avant 8,80)
 
 # --- Toiture (donnée 22/09/2026) -------------------------------------------------
@@ -66,7 +66,8 @@ FAITAGE_AXE = "x"            # faîtages parallèles au mur haut -> nefs de 35,5
                              # ("y" = parallèles au mur droit, nefs de 9,83 m : 1re version)
 
 # --- HYPOTHÈSES (schéma p.7 ou valeur courante) --------------------------------
-JEU_X = 0.40                 # entre deux tablettes voisines ; rang 1 centré, marges déduites
+JEU_X = 0.25                 # entre deux tablettes voisines (06/11 « un peu moins espacés » : hyp., avant 0,40)
+MARGE_OUEST = 0.65           # mur ouest -> rang 1 ; tout le reste forme le couloir est (06/11)
                              # (max 0,508 m : les marges tombent alors à 0)
 # 1re version calée sur le schéma p.7 : MARGE_G = 1.30, MARGE_D = 2.10 -> jeu 0,225 m
 RECUL_HAUT = 0.80            # mur haut -> rang 1
@@ -85,8 +86,9 @@ R4_R5_JEU = 0.80             # (mode "fixe") hyp., avant 0.20
 Z_TUBE_CHAUD, Z_TUBE_FROID = 1.50, 1.35   # tubes verts superposés, « à 1,5 m » (donné)
 RECUL_TUBES_MUR = 0.18       # hyp. axe des tubes du mur haut -> mur
 DEMI_ECART_PAIRES = 0.14     # hyp. écart des 2 paires centrales de part et d'autre des poteaux
-PAS_POTEAUX_MUR = 3.20       # hyp. poteaux de façade portant les tubes (IMG_5710)
-PAS_POTEAUX_CENTRE = 4.00    # hyp. poteaux du réseau central (IMG_5711)
+N_TRAVEES = 9                # 06/11 : 8 à 9 écrans par nef, un écran d'un poteau au suivant (9 retenu, hyp.)
+PAS_POTEAUX_MUR = LARGEUR / N_TRAVEES      # ≈ 3,28 m, même trame pour toutes les rangées
+PAS_POTEAUX_CENTRE = PAS_POTEAUX_MUR
 CIRCUIT = "chaud_vers_froid" # 1 circuit par tablette : départ sur le tube chaud, 3 passes
                              # sous la tablette, retour dans le tube froid (22/09, « je crois »)
 # 1re version : CIRCUIT = "deux_departs" -> un flexible chaud + un froid indépendants
@@ -160,13 +162,13 @@ def niveaux():
     return y
 
 
-def marge_x():
-    """Marge entre le mur et la tablette extrême du rang 1, identique des deux côtés."""
-    return (LARGEUR - R1_N * T_LARG - (R1_N - 1) * JEU_X) / 2
+def marge_est():
+    """Largeur du couloir est : mur est -> tablette extrême du rang 1."""
+    return LARGEUR - MARGE_OUEST - R1_N * T_LARG - (R1_N - 1) * JEU_X
 
 
 def pas_x():
-    if marge_x() < 0:
+    if marge_est() < 0:
         raise ValueError(f"{R1_N} tablettes de {T_LARG} m avec un jeu de {JEU_X} m "
                          f"dépassent les {LARGEUR} m du mur haut")
     return T_LARG + JEU_X, JEU_X
@@ -195,13 +197,15 @@ def tablettes():
     """Liste de dicts : rang, numéro (1 = côté galerie, comme le rapport), rectangle."""
     pas, _ = pas_x()
     y = niveaux()
-    x_d = lambda k: LARGEUR - marge_x() - (k - 1) * pas   # bord droit de la position k
+    x_d = lambda k: LARGEUR - marge_est() - (k - 1) * pas   # bord droit de la position k
     tabs = []
-    for rang, n, hyp in (("r1", R1_N, False), ("r2", R23_N, False), ("r3", R23_N, False)):
+    for rang, n, hyp in (("r1", R1_N, True), ("r2", R23_N, False), ("r3", R23_N, False)):
         for k in range(1, n + 1):
             tabs.append(dict(rang=int(rang[1]), num=k, x0=x_d(k) - T_LARG, x1=x_d(k),
                              y0=y[rang][1], y1=y[rang][0], hyp=hyp))
-    x0_45, x1_45 = x_d(R45_POS) - T_LARG, x_d(1)
+    # garde 0,50 m entre les rangs 4-5 et le mur du magasin, sinon la tablette touche le pan coupé
+    x0_45 = max(x_d(R45_POS) - T_LARG, portee(enveloppe(), y["r5"][1], "x")[0] + 0.50)
+    x1_45 = x_d(1)
     long45 = (x1_45 - x0_45 - (R45_N - 1) * R45_JEU_X) / R45_N
     for rang in ("r4", "r5"):
         for k in range(1, R45_N + 1):               # 1 = côté galerie
@@ -240,36 +244,28 @@ def reseau(tabs):
     n_mur = int(LARGEUR / PAS_POTEAUX_MUR)
     poteaux_mur = [(k * PAS_POTEAUX_MUR, H_DROIT - 0.05) for k in range(1, n_mur + 1)
                    if k * PAS_POTEAUX_MUR < LARGEUR - 0.3]
-    poteaux_centre = []
-    x = x_bout_c + 0.75
-    while x < x_fin:
-        poteaux_centre.append((x, y["reseau"]))
-        x += PAS_POTEAUX_CENTRE
+    poteaux_centre = [(k * PAS_POTEAUX_CENTRE, y["reseau"]) for k in range(1, N_TRAVEES)
+                      if x_bout_c < k * PAS_POTEAUX_CENTRE < x_arr_c]
     return lignes, poteaux_mur, poteaux_centre
 
 
 def poteaux_nefs(tabs=None):
-    """Rangées de poteaux sous les chéneaux, hors rangée centrale (déjà dans reseau()).
-    Même pas et mêmes x que les poteaux centraux. Lève une erreur si un poteau tombe
-    sur une tablette."""
+    """Poteaux sous les chéneaux, sur la trame des N_TRAVEES, hors poteaux déjà portés par
+    reseau(). Lève une erreur si un poteau tombe sur une tablette."""
     tabs = tabs or tablettes()
     _, _, centre = reseau(tabs)
-    x_ref, poly, y_c = centre[0][0], enveloppe(), niveaux()["reseau"]
-    w, out = H_DROIT / N_NEFS, []
+    poly, w, out = enveloppe(), H_DROIT / N_NEFS, []
     for i in range(1, N_NEFS):
         yp = i * w
-        if abs(yp - y_c) < 1e-6:
-            continue
         a0, a1 = portee(poly, yp, "x")
-        k0 = int((x_ref - a0) // PAS_POTEAUX_CENTRE)
-        x = x_ref - k0 * PAS_POTEAUX_CENTRE
-        while x < a1 - 0.3:
-            if x > a0 + 0.3:
-                for t in tabs:
-                    if t["x0"] <= x <= t["x1"] and t["y0"] <= yp <= t["y1"]:
-                        raise ValueError(f"poteau ({x:.2f}, {yp:.2f}) sur la tablette R{t['rang']}-{t['num']}")
-                out.append((x, yp))
-            x += PAS_POTEAUX_CENTRE
+        for k in range(1, N_TRAVEES):
+            x = k * PAS_POTEAUX_CENTRE
+            if not a0 + 0.3 < x < a1 - 0.3 or any(abs(x - c[0]) < 1e-6 and abs(yp - c[1]) < 1e-6 for c in centre):
+                continue
+            for t in tabs:
+                if t["x0"] <= x <= t["x1"] and t["y0"] <= yp <= t["y1"]:
+                    raise ValueError(f"poteau ({x:.2f}, {yp:.2f}) sur la tablette R{t['rang']}-{t['num']}")
+            out.append((x, yp))
     return out
 
 
@@ -430,7 +426,7 @@ def construire(tabs, poly):
     xc = 33.0
     bornes = [top, y["r1"][0], y["r1"][1], y["couloir"][1], y["r2"][1], y["r3"][0],
               y["r3"][1], y["r4"][0], y["r4"][1], y["r5"][0], y["r5"][1], 0]
-    hyps = [True, False, True, False, True, False, True, True, True, True, True]
+    hyps = [True, True, True, False, True, False, True, True, True, True, True]
     for (a, b), h in zip(zip(bornes[:-1], bornes[1:]), hyps):
         cote_v(sc, a, b, xc, fr(a - b), hyp=h, label_right=True)
     for yb in bornes:
@@ -441,13 +437,15 @@ def construire(tabs, poly):
 
     # --- cotes horizontales du rang 1 (dans le couloir) ---
     yc = y["couloir"][1] + 0.3
-    x13 = marge_x()
+    x13, x_est = MARGE_OUEST, marge_est()
     cote_h(sc, 0, x13, yc, fr(x13), hyp=True, pt=5)
     cote_h(sc, x13, x13 + T_LARG, yc, fr(T_LARG), pt=5)
     cote_h(sc, x13 + T_LARG, x13 + pas, yc, "", hyp=True)       # jeu : texte déporté
     sc.text(x13 + pas + 0.3, yc + 0.15, f"jeu entre tablettes {fr(jeu)}", 5,
             "COTES_HYP", ha="left", va="bottom", style="italic", color=C_HYP)
-    cote_h(sc, LARGEUR - x13, LARGEUR, yc, fr(x13), hyp=True, pt=5)
+    cote_h(sc, LARGEUR - x_est, LARGEUR, yc, fr(x_est), hyp=True, pt=5)
+    sc.text(LARGEUR - x_est / 2, y["r3"][1] + 4, "couloir est", 5, "COTES_HYP", ha="center",
+            style="italic", color=C_HYP)
 
     # --- passage à gauche des rangs 2-3 ---
     x_r23 = min(t["x0"] for t in tabs if t["rang"] == 2)
@@ -544,7 +542,7 @@ def cartouche(ax, tabs, poly, x0, ytop):
         hyp = tr[0]["hyp"]
         col = C_HYP if hyp else C_DONNEE
         vals = [f"{r}", f"{len(tr)}", f"{fr(dx)} × {fr(dy)}", f"{fr(s, 1)} m²",
-                "hyp. (rapport p.7)" if hyp else ("donné 06/11/2026" if r in (2, 3) else "donné 22/09/2026")]
+                "hyp. 06/11/2026" if r == 1 else "hyp. (rapport p.7)" if hyp else "donné 06/11/2026"]
         for c, v in zip(cols, vals):
             ax.text(c, y, v, fontsize=6.3, va="top", color=col,
                     fontstyle="italic" if hyp and c == cols[-1] else "normal")
@@ -597,8 +595,8 @@ def cartouche(ax, tabs, poly, x0, ytop):
     # sources
     y -= 0.9
     src = ("Enveloppe : plan de site du 12/12/2012 (29,50 · 25,50 · 35,5 ; mur du magasin\n"
-           "5,00 × 9,50). Tablettes des rangs 1 à 3 : données du 22/09/2026, longueur des rangs 2-3 et 4 nefs : 06/11/2026.\n"
-           f"Jeu entre tablettes supposé ({fr(JEU_X)} m), rang 1 centré. Rangs 4-5, recul,\n"
+           "5,00 × 9,50). Rangs 2-3 et 4 nefs : donnés le 06/11/2026 ; couloir est et longueur du rang 1 : supposés.\n"
+           f"Jeu entre tablettes supposé ({fr(JEU_X)} m). Rangs 4-5, recul,\n"
            "couloir, allées : schéma p.7 du rapport Analyse Bocage ou valeurs courantes.\n"
            "Réseau chaud/froid : photos du 22/09/2026 (rigerie_circu_eau/), une paire par\n"
            + ("rangée ; par tablette (rangs 1 à 3), départ chaud, retour au froid. En plan, chaque\n"
